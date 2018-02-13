@@ -18,7 +18,7 @@ classdef BCIController < handle
         end
 
         function initController(obj)
-            obj.addPaths();
+            %obj.addPaths();
 
             % Connect to the CnbiTk loop
             if(obj.loop.connect() == false)
@@ -60,7 +60,10 @@ classdef BCIController < handle
                 obj.inputMemory = [obj.inputMemory obj.input];
                 updated = true;
             end
-            
+        end
+
+        function purge(obj)
+            obj.inputMemory = [];
         end
     end
 end

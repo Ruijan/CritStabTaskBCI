@@ -39,6 +39,14 @@ classdef System < handle
             %   Detailed explanation goes here
             reachedLimit = (abs(obj.state) - obj.boundary) >= 0;
         end
+
+        function reset(obj)
+            obj.stateMemory = [];
+            obj.inputMemory = [];
+            obj.input       = 0;
+            obj.state       = 0;
+            obj.lambda      = 0;
+        end
     end
 end
 

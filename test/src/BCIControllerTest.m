@@ -98,5 +98,16 @@ classdef BCIControllerTest < matlab.mock.TestCase & handle
             testCase.controller.initController();
             testCase.verifyError(@() testCase.controller.update(), 'BCIController:TICConnection');
         end
+
+        function testControllerPurge(testCase)
+            testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.isConnected), true)
+            testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.isAttached), true)
+            testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.getMessage), true)
+            testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.getICMessage), '3.55')
+            testCase.controller.initController();
+            testCase.controller.update();
+            testCase.controller.purge();
+            testCase.verifyEqual(length(testCase.controller.inputMemory), 0);
+        end
     end
 end

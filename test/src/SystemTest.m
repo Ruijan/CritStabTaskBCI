@@ -73,5 +73,18 @@ classdef SystemTest < matlab.unittest.TestCase
             testCase.verifyEqual(testCase.sys.stateMemory, states);
             testCase.verifyEqual(testCase.sys.inputMemory, inputs);
         end
+
+        function testSystemReset(testCase)
+            newInput    = 0.1;
+            dt          = 0.01;
+            testCase.sys.setInput(newInput);
+            testCase.sys.update(dt);
+            testCase.sys.reset();
+            testCase.verifyEqual(length(testCase.sys.inputMemory), 0);
+            testCase.verifyEqual(length(testCase.sys.stateMemory), 0);
+            testCase.verifyEqual(testCase.sys.input, 0);
+            testCase.verifyEqual(testCase.sys.state, 0);
+            testCase.verifyEqual(testCase.sys.lambda, 0);
+        end
     end
 end

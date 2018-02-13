@@ -56,5 +56,11 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
             testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.update()));
             testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.update()));
         end
+
+        function testCSTaskPurge(testCase)
+            testCase.task.purge();
+            testCase.verifyCalled(withExactInputs(testCase.systemMock.behavior.reset()));
+            testCase.verifyCalled(withExactInputs(testCase.bciControllerMock.behavior.purge()));
+        end
     end
 end

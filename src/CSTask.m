@@ -26,6 +26,10 @@ classdef CSTask < handle
                 obj.unstableSystem.update();
             end
         end
+
+        function purge(obj)
+            
+        end
     end
 end
 
