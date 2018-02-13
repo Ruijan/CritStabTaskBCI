@@ -1,28 +1,25 @@
-classdef CSTask < handle
+classdef GraphicalCSTask < handle & CSTask
     %SYSTEM Summary of this class goes here
     %   Detailed explanation goes here
     
     properties
-        bciController,
-        unstableSystem,
-        runs            = 0,
-        trialsPerRun    = 0,
-        currentTrial    = 1,
-        currentRun      = 1
+        engine
     end
     
     methods
-        function obj = CSTask(nBciController, bSystem, runs, trialsPerRun)
+        function obj = GraphicalCSTask(nBciController, ...
+            bSystem, runs, trialsPerRun, engine)
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
-            obj.bciController       = nBciController;
-            obj.unstableSystem      = bSystem;
-            obj.runs                = runs;
-            obj.trialsPerRun        = trialsPerRun;
+            obj@CSTask(nBciController, bSystem, runs, trialsPerRun);
+            obj.engine = engine;
         end
 
         function init(obj)
-            obj.bciController.initController();
+            init@CSTask(obj);
+            set(0,'units','pixels');
+            screenResolution = get(0,'screensize');
+            obj.engine.openWindow(screenResolution);
         end
 
         function update(obj)

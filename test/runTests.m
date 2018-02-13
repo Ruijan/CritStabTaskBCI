@@ -7,6 +7,8 @@ function runTests(file)
 
 	addpath('src');
 	addpath('src/mocks');
+	createMocks('../src/');
+
 	suite = [];
 	if(nargin == 0)  
 		suite = TestSuite.fromFolder('src');
@@ -28,4 +30,19 @@ function runTests(file)
 	result = run(suite);
 	% result = runner.run(suite1)
 	disp(table(result))
+end
+
+function createMocks(folder)
+	mockCreator = MockCreator;
+	listing = dir(folder);
+	addpath(folder);
+	for i = 3:length(listing)
+		if ~listing(i).isdir
+			mockCreator.createMockFileFromClassName(listing(i).name(1:end-2), 'src/mocks/');
+		else
+			createMocks([folder '/' listing(i).name]);
+		end
+
+	end
+	rmpath(folder);
 end
