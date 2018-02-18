@@ -4,8 +4,8 @@ classdef TobiICGet < handle & TobiIC
 
     
     methods
-        function obj = TobiICGet()
-            obj@TobiIC();
+        function obj = TobiICGet(loop)
+            obj@TobiIC(loop);
             [obj.tobiIC] = tic_newgetonly();
         end
 

@@ -5,6 +5,25 @@ classdef Loop < handle
     properties
         loop
     end
+    methods(Static)
+        function addPaths()
+            if(isempty(getenv('CNBITKMAT_ROOT')))
+                disp('[ndf_include] $CNBITKMAT_ROOT not found, using default');
+                setenv('CNBITKMAT_ROOT', '/usr/share/cnbiloop/cnbitkmat/');
+            end
+            if(isempty(getenv('EEGC3_ROOT')))
+                disp('[ndf_include] $EEGC3_ROOT not found, using default');
+                setenv('EEGC3_ROOT', '/opt/eegc3');
+            end
+            mtpath_root = [getenv('CNBITKMAT_ROOT') '/mtpath'];
+            if(exist(mtpath_root, 'dir'))
+                addpath(mtpath_root);
+            end
+            mtpath_include('$CNBITKMAT_ROOT/');
+            mtpath_include('$EEGC3_ROOT/');
+            mtpath_include('$EEGC3_ROOT/modules/smr');
+        end      
+    end
     
     methods
         function obj = Loop()
@@ -142,7 +161,9 @@ classdef Loop < handle
         function [isvalid] = checkName(name)
             mex_id_ = 'o bool = clcheckname(i cstring[x])';
             [isvalid] = cnbiloop(mex_id_, name, 1024);
-        end                
+        end      
+
+            
     end
 end
 

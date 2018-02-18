@@ -9,10 +9,10 @@ classdef TobiIC < handle
         serializer
     end
     methods
-        function obj = TobiICGet(nLoop)
+        function obj = TobiIC(nLoop)
             obj.loop = nLoop;
             obj.iCMessage = icmessage_new();
-            onj.serializer = icserializerrapid_new(obj.iCmessage);
+            onj.serializer = icserializerrapid_new(obj.iCMessage);
         end
         function [attached] = isAttached(obj)
             [attached] = tic_isattached(obj.loop);

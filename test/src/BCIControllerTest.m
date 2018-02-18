@@ -12,8 +12,7 @@ classdef BCIControllerTest < matlab.mock.TestCase & handle
             import matlab.unittest.constraints.IsAnything;
             testCase.ticMock = TobiICGetMock(testCase);
             testCase.loopMock = LoopMock(testCase);
-            testCase.controller =  BCIController(testCase.loopMock.stub, ...
-                testCase.ticMock.stub);
+            testCase.controller =  BCIController(testCase.loopMock.stub, testCase.ticMock.stub);
         end
     end
     
@@ -27,22 +26,19 @@ classdef BCIControllerTest < matlab.mock.TestCase & handle
     methods (Test)
         % includes unit test functions
         function testBCIControllerCreation(testCase)
-
             testCase.verifyEqual(testCase.controller.input,         0);
             testCase.verifyEmpty(testCase.controller.inputMemory,   0);
-            testCase.verifyEqual(testCase.controller.loop,   ...
-                testCase.loopMock.stub);
-            testCase.verifyEqual(testCase.controller.tobiICGet,   ...
-                testCase.ticMock.stub);
         end
 
         function testFailedToConnectToLoopShouldThrow(testCase)
+            testCase.controller.initController();
             testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.connect), false)
             testCase.verifyError(@() testCase.controller.initController(), ...
                 'BCIController:Connection');
         end
 
         function testFailedToAttachTICShouldThrow(testCase)
+            testCase.controller.initController();
             testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.connect), true)
             testCase.assignOutputsWhen(testCase.ticMock.behavior.attach('/dev'), false)
             testCase.verifyError(@() testCase.controller.initController(), ...
@@ -51,18 +47,21 @@ classdef BCIControllerTest < matlab.mock.TestCase & handle
 
         function testControllerInitialization(testCase)
             testCase.controller.initController();
-            testCase.verifyEqual(getenv('CNBITKMAT_ROOT'), '/usr/share/cnbiloop/cnbitkmat/');
-            testCase.verifyEqual(getenv('EEGC3_ROOT'), '/opt/eegc3');
+            testCase.verifyCalled(withExactInputs(testCase.loopMock.behavior.addPaths));
             testCase.verifyCalled(withExactInputs(testCase.loopMock.behavior.connect));
             testCase.verifyCalled(testCase.ticMock.behavior.attach('/dev'));
+            testCase.verifyEqual(testCase.controller.loop,   ...
+                testCase.loopMock.stub);
+            testCase.verifyEqual(testCase.controller.tobiICGet,   ...
+                testCase.ticMock.stub);
         end
 
         function testControllerUpdateWithMessage(testCase)
+            testCase.controller.initController();
             testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.isConnected), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.isAttached), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.getMessage), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.getICMessage), '3.55')
-            testCase.controller.initController();
             testCase.verifyEqual(testCase.controller.update(), true);
             testCase.verifyCalled(withExactInputs(testCase.loopMock.behavior.isConnected));
             testCase.verifyCalled(withExactInputs(testCase.ticMock.behavior.isAttached));
@@ -73,10 +72,10 @@ classdef BCIControllerTest < matlab.mock.TestCase & handle
         end
 
         function testControllerUpdateWithNoMessage(testCase)
+            testCase.controller.initController();
             testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.isConnected), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.isAttached), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.getMessage), false)
-            testCase.controller.initController();
             testCase.verifyEqual(testCase.controller.update(), false);
             testCase.verifyCalled(withExactInputs(testCase.loopMock.behavior.isConnected));
             testCase.verifyCalled(withExactInputs(testCase.ticMock.behavior.isAttached));
@@ -85,26 +84,26 @@ classdef BCIControllerTest < matlab.mock.TestCase & handle
         end
 
         function testControllerUpdateLostConnection(testCase)
+            testCase.controller.initController();
             testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.isConnected), false)
 
-            testCase.controller.initController();
             testCase.verifyError(@() testCase.controller.update(), 'BCIController:Connection');
         end
 
         function testControllerUpdateTICDetached(testCase)
+            testCase.controller.initController();
             testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.isConnected), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.isAttached), false)
 
-            testCase.controller.initController();
             testCase.verifyError(@() testCase.controller.update(), 'BCIController:TICConnection');
         end
 
         function testControllerPurge(testCase)
+            testCase.controller.initController();
             testCase.assignOutputsWhen(withExactInputs(testCase.loopMock.behavior.isConnected), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.isAttached), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.getMessage), true)
             testCase.assignOutputsWhen(withExactInputs(testCase.ticMock.behavior.getICMessage), '3.55')
-            testCase.controller.initController();
             testCase.controller.update();
             testCase.controller.purge();
             testCase.verifyEqual(length(testCase.controller.inputMemory), 0);
