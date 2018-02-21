@@ -55,5 +55,14 @@ classdef GraphicalEngine < handle
 		function center = getCenter(obj)
 			center = obj.windowSize(3:4) ./ 2;
 		end
+
+		function keyPressed = checkIfKeyPressed(obj, key)
+			keyboardKey = KbName(key);
+			[a,b,keyCode] = KbCheck;
+			keyPressed = false;
+			if any(keyCode(yesKeys))
+				keyPressed = true;
+			end
+		end
 	end
 end

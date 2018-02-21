@@ -21,6 +21,12 @@ classdef ControllerEvaluator < handle
 		end
 
 		function channelCapacity = computeChannelCapacity(error0, error1)
+			%COMPUTECHANNELCAPACITY compute the channel capacity of a binary asymmetric channel
+			% 
+			% 	Description
+			%	channelCapacity = computeChannelCapacity(error0, error1) computes the channel 
+			% 	capacity of a binary asymmetric channel. Error0 and Error1 are false positive and 
+			% 	false negative rates.
 			if error0 > 0.5
 				error0 = 1 - error0;
 			end

@@ -14,13 +14,13 @@ classdef GraphicalCSTask < handle & CSTask
             
         end
 
-        function init(obj, controller, engine, bSystem, runs, trialsPerRun, updateRate)
+        function init(obj, controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate)
             disp('Init Task')
             obj.updateRate          = updateRate;
             obj.controller          = controller;
-            obj.unstableSystem      = bSystem;
-            obj.runs                = runs;
-            obj.trialsPerRun        = trialsPerRun;
+            obj.unstableSystem      = nSystem;
+            obj.difficultyUpdater   = difficultyUpdater;
+            obj.taskRunner          = taskRunner;
             obj.engine              = engine;
             set(0,'units','pixels');
             screenResolution = get(0,'screensize')
@@ -47,13 +47,26 @@ classdef GraphicalCSTask < handle & CSTask
             switchTrial@CSTask(obj, dt);
         end
 
+        function switchRun(obj, dt)
+            switchRun@CSTask(obj, dt);
+
+        end
+
         function pauseTask(obj, pauseTime)
             tic;
             currentTime = toc;
             while currentTime < pauseTime
+                outcome = 'Failure';
+                if isempty(obj.taskRunner.results)
+                    outcome = 'Unknown';
+                elseif obj.taskRunner.results(end) == 1
+                    outcome = 'Success';
+                end
                 obj.engine.drawText(['Break ' num2str(round(currentTime,1)) '/'...
-                        num2str(pauseTime) '\n Trial ' num2str(obj.currentTrial) '/'...
-                        num2str(obj.trialsPerRun)], obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
+                        num2str(pauseTime) '\n Trial ' num2str(obj.taskRunner.currentTrial) '/'...
+                        num2str(obj.taskRunner.trialsPerRun) '\n Difficulty ' num2str(obj.unstableSystem.lambda) ...
+                        '\n Outcome : ' outcome], ...
+                        obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
                 obj.engine.updateScreen();
                 currentTime = toc;
             end

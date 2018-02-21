@@ -8,7 +8,7 @@ function runCST(varargin)
 	
 	p = inputParser;
 	addOptional(p,'controller',defaultControllerMode, @ControllerFactory.isValidController);
-	addOptional(p,'display',defaultDisplayMode,@validScalarPosNum);
+	addOptional(p,'display',defaultDisplayMode,@isValidDisplay);
 	addOptional(p,'runs',defaultRuns,@isValidScalarPosNum);
 	addOptional(p,'trialsPerRun',defaultTrialsPerRun,@isValidScalarPosNum);
 	parse(p,varargin{:});
@@ -16,18 +16,23 @@ function runCST(varargin)
 		strcmp(p.Results.controller, 'BCI') && ~strcmp(p.Results.display, 'Graphic')
 		p.Results.display = 'Graphic';
 	end
+	taskRunnerMode = 'Simple';
+	if strcmp(p.Results.controller, 'BCI')
+		taskRunnerMode = 'BCI';
+	end
 
-	varargs = {}
-	engine = [];
-	task = [];
-	controller = ControllerFactory.createController(p.Results.controller);
-	newSystem = SystemFactory.createSystem(p.Results.display);
-	task = CSTaskFactory.createCSTask(p.Results.display);
+	controller 			= ControllerFactory.createController(p.Results.controller);
+	newSystem 			= SystemFactory.createSystem(p.Results.display);
+	task 				= CSTaskFactory.createCSTask(p.Results.display);
+	taskRunner 			= TaskRunnerFactory.createTaskRunner(taskRunnerMode, p.Results.runs, p.Results.trialsPerRun);
+	difficultyUpdater 	= QuestDifficultyUpdater(1.5, 5, 1.5, 0.75, 3.5, 0.99, 0.01);
+	engine 				= [];
 	if strcmp(p.Results.display, 'Graphic')
 		engine = GraphicalEngine(2);
 	end
-	task.init(controller, engine, newSystem, p.Results.runs, p.Results.trialsPerRun, 50);
-	
+	taskUpdateRate 			= 50; % in Hz
+	task.maxTimePerTrial 	= 6;
+	task.init(controller, engine, newSystem, difficultyUpdater, taskRunner, taskUpdateRate);
 	task.start();
 	task.destroy();
 end

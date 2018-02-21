@@ -4,7 +4,7 @@ classdef ControllerEvaluatorTest < matlab.mock.TestCase & handle
 		evaluator
 	end
 	methods(TestMethodSetup)
-        function createTask(testCase)
+        function createEvaluator(testCase)
             import matlab.unittest.TestCase
             import matlab.mock.constraints.WasCalled;
             import matlab.unittest.constraints.IsAnything;

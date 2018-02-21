@@ -5,16 +5,13 @@ classdef CSTask < handle
     properties
         controller,
         unstableSystem,
+        difficultyUpdater,
+        taskRunner,
         controllerITR   = 0,
-        runs            = 0,
-        trialsPerRun    = 0,
-        currentTrial    = 1,
-        currentRun      = 1,
+        ITRMemory       = [],
         updateRate      = 60,
         maxTimePerTrial = 10,
-        currentTime     = 0,
-        results         = [],
-        ITRMemory       = []
+        currentTime     = 0
     end
     
     methods
@@ -23,18 +20,19 @@ classdef CSTask < handle
             %   Detailed explanation goes here
         end
 
-        function init(obj, controller, bSystem, runs, trialsPerRun, updateRate)
+        function init(obj, controller, nSystem, difficultyUpdater, taskRunner, updateRate)
             disp('Init CSTTask');
-            obj.initParameters(controller, bSystem, runs, trialsPerRun, updateRate);
+            obj.initParameters(controller, nSystem, difficultyUpdater, taskRunner, updateRate);
             obj.controller.initController();
+
         end
 
-        function initParameters(obj, controller, bSystem, runs, trialsPerRun, updateRate)
+        function initParameters(obj, controller, System, difficultyUpdater, runs, trialsPerRun, updateRate)
             obj.updateRate          = updateRate;
             obj.controller          = controller;
-            obj.unstableSystem      = bSystem;
-            obj.runs                = runs;
-            obj.trialsPerRun        = trialsPerRun;
+            obj.unstableSystem      = System;
+            obj.difficultyUpdater   = difficultyUpdater;
+            obj.taskRunner          = taskRunner;
         end
 
         function start(obj)
@@ -61,19 +59,23 @@ classdef CSTask < handle
             if ~obj.unstableSystem.exploded() && obj.currentTime < obj.maxTimePerTrial
                 obj.runTrial(dt);
             else
-                obj.saveSuccess();
+                outcome = obj.getOutcome();
+                obj.taskRunner.update(outcome);
                 obj.switchTrial(dt);
-                if obj.shouldSwitchRun()
+                % We need to send the opposite command because it is the opposite of a detection task
+                obj.difficultyUpdater.update(obj.unstableSystem.lambda, ~outcome);
+                obj.unstableSystem.lambda = obj.difficultyUpdater.getNewDifficulty();
+                if obj.taskRunner.shouldSwitchRun()
                     obj.switchRun(dt);
                 end
             end
         end
 
-        function saveSuccess(obj)
+        function outcome = getOutcome(obj)
             if obj.currentTime >= obj.maxTimePerTrial
-                obj.results = [obj.results 1];
+                outcome = 1;
             else
-                obj.results = [obj.results 0];
+                outcome = 0;
             end
         end
 
@@ -82,6 +84,13 @@ classdef CSTask < handle
                 obj.unstableSystem.setInput(obj.controller.input);
             end
             obj.unstableSystem.update(dt);
+            obj.computeITR();
+            obj.currentTime = obj.currentTime + dt;
+            disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.maxTimePerTrial)])
+            disp(['Current ITR : ' num2str(obj.controllerITR)])
+        end
+
+        function computeITR(obj)
             period = 64;
             if length(obj.unstableSystem.stateMemory) - 1 < period
                 period = length(obj.unstableSystem.stateMemory) - 1;
@@ -91,24 +100,18 @@ classdef CSTask < handle
                     obj.unstableSystem.stateMemory(end-period:end), ...
                     obj.unstableSystem.inputMemory(end-period:end));
                 obj.ITRMemory = [obj.ITRMemory obj.controllerITR];
-                        %  * ...
-                        % (obj.unstableSystem.timeMemory(end) - obj.unstableSystem.timeMemory(end-32));
             end
-            obj.currentTime = obj.currentTime + dt;
-            disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.maxTimePerTrial)])
-            disp(['Current ITR : ' num2str(obj.controllerITR)])
         end
 
         function switchTrial(obj, dt)
             obj.save();
             obj.purge();
-            obj.currentTrial    = obj.currentTrial + 1;
+            obj.taskRunner.switchTrial();
             obj.currentTime     = 0;
         end
 
         function switchRun(obj, dt)
-            obj.currentRun      = obj.currentRun + 1;
-            obj.currentTrial    = 1;
+            obj.taskRunner.switchRun();
         end
 
         function purge(obj)
@@ -118,17 +121,16 @@ classdef CSTask < handle
         end
 
         function save(obj)
-            trial = struct('Controller', struct(obj.controller), 'System', struct(obj.unstableSystem), 'Results', obj.results, 'ITR', obj.ITRMemory);
-            save(['Trial_' num2str(obj.currentTrial)], 'trial');
-        end
-
-        function shouldSwitch = shouldSwitchRun(obj)
-            shouldSwitch = obj.currentTrial > obj.trialsPerRun;
+            trial = struct('Controller', struct(obj.controller), 'System', ...
+                struct(obj.unstableSystem), 'TaskRunner', obj.taskRunner, 'ITR', obj.ITRMemory);
+            save(['Run_' num2str(obj.taskRunner.currentRun) '_Trial_' ...
+                num2str(obj.taskRunner.currentTrial)], 'trial');
         end
 
         function done = isDone(obj)
-            done = obj.currentRun > obj.runs;
+            done = obj.taskRunner.isDone();
         end
+
         function destroy(obj)
 
         end
