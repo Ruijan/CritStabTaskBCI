@@ -29,7 +29,7 @@ classdef ConnectedTaskRunner < handle & TaskRunner
             if(obj.loop.connect() == false)
                 error('ConnectedTaskRunner:Connection', 'Cannot connect to CNBI Loop.')
             end 
-            if(obj.tobiIdSender.attach('/dev') == false)
+            if(obj.tobiIdSender.attach('/bus') == false)
                 error('ConnectedTaskRunner:TIDConnection', 'Cannot connect to attach TobiID to CNBI Loop.')
             end
             obj.checkIfConnected();

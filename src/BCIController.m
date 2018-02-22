@@ -22,7 +22,7 @@ classdef BCIController < handle & Controller
             if(obj.loop.connect() == false)
                 error('BCIController:Connection', 'Cannot connect to CNBI Loop.')
             end 
-            if(obj.tobiICGet.attach('/dev') == false)
+            if(obj.tobiICGet.attach('/ctrl1') == false)
                 error('BCIController:TICConnection', 'Cannot connect to attach TobiIC to CNBI Loop.')
             end
         end
@@ -36,7 +36,7 @@ classdef BCIController < handle & Controller
                 error('BCIController:TICConnection', 'TobiICGet is not attached to the loop anymore.')
             end 
             if obj.tobiICGet.getMessage()
-                obj.input = obj.tobiICGet.getICMessage();
+                obj.input = obj.tobiICGet.getProbability();
                 obj.inputMemory = [obj.inputMemory obj.input];
                 updated = true;
             end

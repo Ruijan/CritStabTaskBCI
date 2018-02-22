@@ -12,16 +12,16 @@ classdef TobiIC < handle
         function obj = TobiIC(nLoop)
             obj.loop = nLoop;
             obj.iCMessage = icmessage_new();
-            onj.serializer = icserializerrapid_new(obj.iCMessage);
+            obj.serializer = icserializerrapid_new(obj.iCMessage);
         end
         function [attached] = isAttached(obj)
-            [attached] = tic_isattached(obj.loop);
+            [attached] = tic_isattached(obj.tobiIC);
         end
         function attached = attach(obj, name)
             [attached] = tic_attach(obj.tobiIC, name);
         end
         function attached = detach(obj)
-            [attached] = tic_detach(obj.loop);
+            [attached] = tic_detach(obj.tobiIC);
         end
         function tIC = delete(obj)
             [obj.tobiIC] = tic_delete(obj.tobiIC);

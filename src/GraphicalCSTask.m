@@ -67,6 +67,10 @@ classdef GraphicalCSTask < handle & CSTask
                         num2str(obj.taskRunner.trialsPerRun) '\n Difficulty ' num2str(obj.unstableSystem.lambda) ...
                         '\n Outcome : ' outcome], ...
                         obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
+                if obj.engine.checkIfKeyPressed('ESCAPE')
+                    obj.userDone = true;
+                    return
+                end
                 obj.engine.updateScreen();
                 currentTime = toc;
             end

@@ -11,7 +11,8 @@ classdef CSTask < handle
         ITRMemory       = [],
         updateRate      = 60,
         maxTimePerTrial = 10,
-        currentTime     = 0
+        currentTime     = 0,
+        userDone        = false
     end
     
     methods
@@ -128,7 +129,7 @@ classdef CSTask < handle
         end
 
         function done = isDone(obj)
-            done = obj.taskRunner.isDone();
+            done = obj.userDone || obj.taskRunner.isDone();
         end
 
         function destroy(obj)

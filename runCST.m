@@ -1,7 +1,7 @@
 function runCST(varargin)
 	addpath('src/')
 	addpath('src/interfaces')
-	defaultControllerMode 	= 'Mouse';
+	defaultControllerMode 	= 'BCI';
 	defaultDisplayMode 		= 'Graphic';
 	defaultRuns				= 4;
 	defaultTrialsPerRun 	= 15;
@@ -39,8 +39,7 @@ end
 
 function valid = isValidDisplay(displayMode)
 	valid = true;
-	if displayMode ~= 'Graphic' && ...
-		controllerMode ~= 'None'
+	if ~strcmp(displayMode,'Graphic')
 		valid = false;
 	end
 end

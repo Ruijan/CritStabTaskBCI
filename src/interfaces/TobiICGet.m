@@ -10,17 +10,15 @@ classdef TobiICGet < handle & TobiIC
         end
 
         function [hasmessage] = getMessage(obj)
-            mex_id_ = 'o bool = ticgetmessage(i ClTobiIc*, i ICSerializerRapid*)';
-            [hasmessage] = cnbiloop(mex_id_, obj.tobiIC, obj.serializer);
+            [hasmessage] = tic_getmessage(obj.tobiIC, obj.serializer);
         end
 
         function [hasmessage] = waitMessage(obj)
-            mex_id_ = 'o bool = ticwaitmessage(i ClTobiIc*, i ICSerializerRapid*)';
-            [hasmessage] = cnbiloop(mex_id_, obj.tobiIC, obj.serializer);
+            [hasmessage] = tic_waitmessage(obj.tobiIC, obj.serializer);
         end
 
-        function [message] = getICMessage(obj)
-            message = iCMessage;
+        function value = getProbability(obj)
+            value = icmessage_getvalue(obj.iCMessage, 'mi', '0')
         end
     end
 end

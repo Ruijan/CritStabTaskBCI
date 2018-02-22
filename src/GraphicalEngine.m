@@ -9,6 +9,7 @@ classdef GraphicalEngine < handle
 		function obj = GraphicalEngine(setup)
 			PsychDefaultSetup(setup);
 			Screen('Preference', 'SkipSyncTests', 2);
+            KbName('UnifyKeyNames');
 			obj.setup = setup;
 		end
 
@@ -60,7 +61,7 @@ classdef GraphicalEngine < handle
 			keyboardKey = KbName(key);
 			[a,b,keyCode] = KbCheck;
 			keyPressed = false;
-			if any(keyCode(yesKeys))
+			if any(keyCode(keyboardKey))
 				keyPressed = true;
 			end
 		end
