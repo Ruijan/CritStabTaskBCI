@@ -6,7 +6,10 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
         runs = 4,
         trialsPerRun = 15,
         updateRate = 50,
-        systemMock
+        systemMock,
+        recorderMock,
+        taskRunnerMock,
+        difficultyUpdaterMock
     end
 
     methods(TestMethodSetup)
@@ -15,6 +18,9 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
             import matlab.unittest.constraints.IsAnything;
             testCase.controllerMock = ControllerMock(testCase);
             testCase.systemMock = SystemMock(testCase);
+            testCase.recorderMock = ExternalRecorderMock(testCase);
+            testCase.taskRunnerMock = TaskRunnerMock(testCase);
+            testCase.difficultyUpdaterMock = DifficultyUpdaterMock(testCase);
             testCase.task =  CSTask();
 
         end
@@ -30,73 +36,64 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
     methods (Test)
         % includes unit test functions
         function testCSTaskCreation(testCase)
-            testCase.verifyEqual(testCase.task.runs, 0);
-            testCase.verifyEqual(testCase.task.trialsPerRun, 0);
-            testCase.verifyEqual(testCase.task.currentTrial, 1);
-            testCase.verifyEqual(testCase.task.currentRun, 1);
+            testCase.verifyEqual(testCase.task.controllerITR, 0);
+            testCase.verifyEqual(testCase.task.ITRMemory, []);
+            testCase.verifyEqual(testCase.task.updateRate, 60);
+            testCase.verifyEqual(testCase.task.maxTimePerTrial, 10);
+            testCase.verifyEqual(testCase.task.currentTime, 0);
+            testCase.verifyEqual(testCase.task.userDone, false);
         end
 
         function testCSTaskInitialization(testCase)
             testCase.initTask();
 
-            testCase.verifyEqual(testCase.task.unstableSystem,   ...
-                testCase.systemMock.stub);
-            testCase.verifyEqual(testCase.task.controller,   ...
-                testCase.controllerMock.stub);
-            testCase.verifyEqual(testCase.task.runs, testCase.runs);
+            testCase.verifyEqual(testCase.task.unstableSystem, testCase.systemMock.stub);
+            testCase.verifyEqual(testCase.task.controller, testCase.controllerMock.stub);
+            testCase.verifyEqual(testCase.task.taskRunner, testCase.taskRunnerMock.stub);
             testCase.verifyEqual(testCase.task.updateRate, testCase.updateRate);
-            testCase.verifyEqual(testCase.task.trialsPerRun, testCase.trialsPerRun);
+            testCase.verifyEqual(testCase.task.difficultyUpdater, testCase.difficultyUpdaterMock.stub);
             testCase.verifyCalled(withExactInputs(testCase.controllerMock.behavior.initController()));
         end
 
-        function testCSTaskUpdate(testCase)
+        function testAddRecorder(testCase)
             testCase.initTask();
+            testCase.task.addRecorder(testCase.recorderMock.stub);
+            testCase.verifyEqual(length(testCase.task.recorders), 1);
+            testCase.verifyEqual(testCase.task.recorders(end), testCase.recorderMock.stub)
+        end
+
+        function testCSTaskUpdate(testCase)
+            import matlab.mock.constraints.WasCalled;
+            testCase.initTask();
+            dt = 0.01;
+            testCase.task.addRecorder(testCase.recorderMock.stub);
+            testCase.task.addRecorder(testCase.recorderMock.stub);
             testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), false);
+            testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.isDone), false);
             testCase.assignOutputsWhen(withExactInputs(testCase.controllerMock.behavior.update), true);
             testCase.assignOutputsWhen(get(testCase.controllerMock.behavior.input), 0.7);
-            testCase.task.update();
-            testCase.verifyCalled(withExactInputs(testCase.systemMock.behavior.update()));
+            testCase.task.update(dt);
+            testCase.verifyCalled(testCase.systemMock.behavior.update(dt));
             testCase.verifyCalled(testCase.systemMock.behavior.setInput(0.7));
-            testCase.verifyCalled(withExactInputs(testCase.systemMock.behavior.update()));
+            testCase.verifyThat(withExactInputs(testCase.recorderMock.behavior.update()), WasCalled('WithCount',2));
         end
 
         function testSystemDone(testCase)
+            import matlab.unittest.constraints.IsAnything;
             testCase.initTask();
+            testCase.task.addRecorder(testCase.recorderMock.stub);
+            testCase.task.addRecorder(testCase.recorderMock.stub);
+            testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.isDone), false);
             testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), true);
-            testCase.task.update();
+            testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.shouldSwitchRun), true);
+            testCase.task.update(0.01);
             testCase.verifyCalled(withExactInputs(testCase.systemMock.behavior.exploded()));
-            testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.update()));
-            testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.update()));
-        end
-
-        function testMaxRunReachedDone(testCase)
-            testCase.initTask();
-            testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), false);
-            testCase.task.currentRun = 5;
-            testCase.task.update();
-            testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.exploded()));
-            testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.update()));
-            testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.update()));
-        end
-
-        function testSwitchToNewRunAfterMaxTrialReached(testCase)
-            testCase.initTask();
-            testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), true);
-            testCase.task.currentRun = 1;
-            testCase.task.currentTrial = 15;
-            testCase.task.update();
-            testCase.verifyEqual(testCase.task.currentRun, 2);
-            testCase.verifyEqual(testCase.task.currentTrial, 1);
-        end
-
-        function testLastTrialReached(testCase)
-            testCase.initTask();
-            testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), true);
-            testCase.task.currentRun = 4;
-            testCase.task.currentTrial = 15;
-            testCase.task.update();
-            testCase.verifyEqual(testCase.task.currentRun, 5);
-            testCase.verifyEqual(testCase.task.currentTrial, 1);
+            testCase.verifyNotCalled(testCase.systemMock.behavior.update(0.01));
+            testCase.verifyCalled(testCase.taskRunnerMock.behavior.update(IsAnything));
+            testCase.verifyCalled(testCase.difficultyUpdaterMock.behavior.update(IsAnything, IsAnything));
+            testCase.verifyCalled(withExactInputs(testCase.difficultyUpdaterMock.behavior.getNewDifficulty()));
+            testCase.verifyCalled(withExactInputs(testCase.taskRunnerMock.behavior.shouldSwitchRun()));
+            testCase.verifyCalled(withExactInputs(testCase.taskRunnerMock.behavior.switchRun()));
         end
 
         function testCSTaskPurge(testCase)
@@ -108,13 +105,13 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
 
         function testIsDone(testCase)
             testCase.initTask();
-            testCase.task.currentRun = 5;
+            testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.isDone), true);
             testCase.verifyEqual(testCase.task.isDone(), true);
         end
 
         function testIsNotDone(testCase)
             testCase.initTask();
-            testCase.task.currentRun = 4;
+            testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.isDone), false);
             testCase.verifyEqual(testCase.task.isDone(), false);
         end
     end
@@ -122,8 +119,8 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
         function initTask(testCase)
             testCase.task.init(testCase.controllerMock.stub, ...
                 testCase.systemMock.stub, ...
-                testCase.runs, ...
-                testCase.trialsPerRun, ...
+                testCase.difficultyUpdaterMock.stub, ...
+                testCase.taskRunnerMock.stub, ...
                 testCase.updateRate);
         end
     end

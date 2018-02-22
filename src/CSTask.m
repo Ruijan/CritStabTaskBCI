@@ -7,6 +7,7 @@ classdef CSTask < handle
         unstableSystem,
         difficultyUpdater,
         taskRunner,
+        recorders       = [],
         controllerITR   = 0,
         ITRMemory       = [],
         updateRate      = 60,
@@ -25,10 +26,13 @@ classdef CSTask < handle
             disp('Init CSTTask');
             obj.initParameters(controller, nSystem, difficultyUpdater, taskRunner, updateRate);
             obj.controller.initController();
-
         end
 
-        function initParameters(obj, controller, System, difficultyUpdater, runs, trialsPerRun, updateRate)
+        function addRecorder(obj, recorder)
+            obj.recorders = [obj.recorders recorder];
+        end
+
+        function initParameters(obj, controller, System, difficultyUpdater, taskRunner, updateRate)
             obj.updateRate          = updateRate;
             obj.controller          = controller;
             obj.unstableSystem      = System;
@@ -85,6 +89,9 @@ classdef CSTask < handle
                 obj.unstableSystem.setInput(obj.controller.input);
             end
             obj.unstableSystem.update(dt);
+            for recorderIndex = 1:length(obj.recorders)
+                obj.recorders(recorderIndex).update();
+            end
             obj.computeITR();
             obj.currentTime = obj.currentTime + dt;
             disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.maxTimePerTrial)])
@@ -122,14 +129,23 @@ classdef CSTask < handle
         end
 
         function save(obj)
-            trial = struct('Controller', struct(obj.controller), 'System', ...
-                struct(obj.unstableSystem), 'TaskRunner', obj.taskRunner, 'ITR', obj.ITRMemory);
+            trial = struct('Controller', struct(obj.controller), ...
+                'System', struct(obj.unstableSystem), ...
+                'TaskRunner', obj.taskRunner, ...
+                'ITR', obj.ITRMemory);
+            for recorderIndex = 1:length(obj.recorders)
+                % We need to remove chars that could be mistaken as commands
+                recorderName = (class(obj.recorders(recorderIndex)));
+                recorderName(recorderName == '.') = '';
+                trial.(recorderName) = obj.recorders(recorderIndex);
+            end
+            trial
             save(['Run_' num2str(obj.taskRunner.currentRun) '_Trial_' ...
                 num2str(obj.taskRunner.currentTrial)], 'trial');
         end
 
         function done = isDone(obj)
-            done = obj.userDone || obj.taskRunner.isDone();
+            done = obj.userDone | obj.taskRunner.isDone();
         end
 
         function destroy(obj)

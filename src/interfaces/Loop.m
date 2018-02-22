@@ -162,6 +162,9 @@ classdef Loop < handle
             mex_id_ = 'o bool = clcheckname(i cstring[x])';
             [isvalid] = cnbiloop(mex_id_, name, 1024);
         end      
+        function loop = getLoop(obj)
+            loop = obj.loop;
+        end
 
             
     end

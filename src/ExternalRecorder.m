@@ -3,5 +3,9 @@ classdef ExternalRecorder < handle
 		data = [],
 		timestamp = []
 	end
-
+	methods(Abstract)
+		update(obj)
+		init(obj)
+		purge(obj)
+	end
 end

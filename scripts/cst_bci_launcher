@@ -1,6 +1,7 @@
 #!/bin/bash
-gnome-terminal --title "loop"\
----tab -e "bash -c 'cl_runloopscope -d gtec'" --title "Loop"
+gnome-terminal \
+---tab -e "bash -c 'cl_runloopscope -d offline.gdf -r'"
+#---tab -e "bash -c 'cl_runloopscope -d gtec'" --title "Loop"
 
 NAME="CSTMILauncher"
 xml="$(python3 launcher.py)"
