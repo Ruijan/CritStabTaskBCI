@@ -15,13 +15,13 @@ classdef TobiID < handle
             onj.serializer = idserializerrapid_new(obj.iDMessage);
         end
         function [attached] = isAttached(obj)
-            [attached] = tid_isattached(obj.loop);
+            [attached] = tid_isattached(obj.tobiID);
         end
         function attached = attach(obj, name)
             [attached] = tid_attach(obj.tobiID, name);
         end
         function attached = detach(obj)
-            [attached] = tid_detach(obj.loop);
+            [attached] = tid_detach(obj.tobiID);
         end
         function tID = delete(obj)
             [obj.tobiID] = tid_delete(obj.tobiID);
