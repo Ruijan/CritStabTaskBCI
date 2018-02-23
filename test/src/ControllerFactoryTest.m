@@ -1,12 +1,14 @@
 classdef ControllerFactoryTest < matlab.mock.TestCase & handle
 	properties
 		factory
+        engineMock
 	end
 	methods(TestMethodSetup)
         function createControllerFactory(testCase)
             import matlab.unittest.TestCase
             import matlab.mock.constraints.WasCalled;
             import matlab.unittest.constraints.IsAnything;
+            testCase.engineMock = GraphicalEngineMock(testCase);
             testCase.factory =  ControllerFactory();
         end
     end
@@ -19,7 +21,8 @@ classdef ControllerFactoryTest < matlab.mock.TestCase & handle
     end
     methods(Test)
     	function testMouseControllerCreation(testCase)
-    		controller = testCase.factory.createController('Mouse');
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getWindowSize), [0, 0, 1920, 1080])
+    		controller = testCase.factory.createController('Mouse', testCase.engineMock.stub);
     		testCase.verifyEqual(class(controller),'MouseController');
     	end
 

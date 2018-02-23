@@ -86,7 +86,7 @@ classdef CSTask < handle
 
         function runTrial(obj, dt)
             if(obj.controller.update())
-                obj.unstableSystem.setInput(obj.controller.input);
+                obj.unstableSystem.setInput(obj.controller.input, obj.controller.minInput, obj.controller.maxInput);
             end
             obj.unstableSystem.update(dt);
             for recorderIndex = 1:length(obj.recorders)
@@ -135,11 +135,11 @@ classdef CSTask < handle
                 'ITR', obj.ITRMemory);
             for recorderIndex = 1:length(obj.recorders)
                 % We need to remove chars that could be mistaken as commands
+                disp('Add EEG data to trial')
                 recorderName = (class(obj.recorders(recorderIndex)));
                 recorderName(recorderName == '.') = '';
-                trial.(recorderName) = obj.recorders(recorderIndex);
+                trial.(recorderName) = struct(obj.recorders(recorderIndex));
             end
-            trial
             save(['Run_' num2str(obj.taskRunner.currentRun) '_Trial_' ...
                 num2str(obj.taskRunner.currentTrial)], 'trial');
         end

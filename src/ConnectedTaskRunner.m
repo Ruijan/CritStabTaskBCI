@@ -26,12 +26,8 @@ classdef ConnectedTaskRunner < handle & TaskRunner
 
         function init(obj)
             % Connect to the CnbiTk loop
-            if(obj.loop.connect() == false)
-                error('ConnectedTaskRunner:Connection', 'Cannot connect to CNBI Loop.')
-            end 
-            if(obj.tobiIdSender.attach('/bus') == false)
-                error('ConnectedTaskRunner:TIDConnection', 'Cannot connect to attach TobiID to CNBI Loop.')
-            end
+            obj.tryConnectingToLoop();
+            obj.tryConnectingToTobiId();
             obj.checkIfConnected();
             % Send Task Start event at the beginning of the very beginning of the task
             obj.tobiIdSender.sendEvent(1);
@@ -59,11 +55,23 @@ classdef ConnectedTaskRunner < handle & TaskRunner
 
         function checkIfConnected(obj)
             if(obj.loop.isConnected() == false)
-                error('ConnectedTaskRunner:Connection', 'Lost connection with CNBI Loop.')
+                obj.tryConnectingToLoop();
             end 
             if(obj.tobiIdSender.isAttached() == false)
-                error('ConnectedTaskRunner:TIDConnection', 'TobiIDSet is not attached to the loop anymore.')
+                obj.tryConnectingToTobiId();
             end
+        end
+        function tryConnectingToTobiId(obj)
+            if(obj.tobiIdSender.attach('/bus') == false)
+                error('ConnectedTaskRunner:TIDConnection', 'Cannot connect to attach TobiID to CNBI Loop.')
+            end
+        end
+
+        function tryConnectingToLoop(obj)
+            % Connect to the CnbiTk loop
+            if(obj.loop.connect() == false)
+                error('ConnectedTaskRunner:Connection', 'Cannot connect to CNBI Loop.')
+            end 
         end
 	end
 end

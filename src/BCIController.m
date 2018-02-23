@@ -11,7 +11,9 @@ classdef BCIController < handle & Controller
         function obj = BCIController(loop, tobiICGet)
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
-            obj@Controller();
+            minProbability = 0;
+            maxProbability = 1;
+            obj@Controller(minProbability, maxProbability);
             obj.loop        = loop;
             obj.tobiICGet   = tobiICGet;
         end

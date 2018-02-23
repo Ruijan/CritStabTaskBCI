@@ -3,10 +3,12 @@ classdef ControllerFactory < handle
 		function controller = createController(varargin)
 			p = inputParser;
 			addRequired(p,'mode', @ControllerFactory.isValidController);
+			addOptional(p,'engine', @ControllerFactory.isValidEngine);
 			parse(p,varargin{:});
+
 			if strcmp(p.Results.mode, 'Mouse')
 				disp('Create Mouse Controller');
-				controller = MouseController();
+				controller = MouseController(p.Results.engine);
 			elseif strcmp(p.Results.mode, 'BCI')
 				disp('Create BCI Controller');
 				Loop.addPaths();
@@ -14,7 +16,6 @@ classdef ControllerFactory < handle
 				tobiICGet = TobiICGet(loop);
 				controller = BCIController(loop, tobiICGet);
 			end
-
 		end
 
 		function valid = isValidController(controllerMode)
@@ -27,6 +28,12 @@ classdef ControllerFactory < handle
 				valid = false;
 			end
 		end
-	end
 
+		function valid = isValidEngine(engine)
+			valid = true;
+			if ~strcmp(class(engine),'GraphicalEngine')
+				valid = false;
+			end
+		end
+	end
 end

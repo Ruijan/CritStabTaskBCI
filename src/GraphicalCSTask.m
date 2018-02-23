@@ -16,25 +16,23 @@ classdef GraphicalCSTask < handle & CSTask
 
         function init(obj, controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate)
             disp('Init Task')
-            obj.updateRate          = updateRate;
-            obj.controller          = controller;
-            obj.unstableSystem      = nSystem;
-            obj.difficultyUpdater   = difficultyUpdater;
-            obj.taskRunner          = taskRunner;
-            obj.engine              = engine;
+
+            obj.initParameters(controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate);
             set(0,'units','pixels');
-            screenResolution = get(0,'screensize')
-            obj.engine.openWindow(screenResolution);
-            if strcmp(class(obj.controller), 'MouseController')
-                obj.controller.initController(engine)
-            else
-                obj.controller.initController();
-            end
+            screenResolution = get(0,'screensize');
+
+            obj.engine.openWindow(screenResolution - [1 1 1 1]);
+
             obj.unstableSystem.init(1.5, ...
                 screenResolution(3)*0.4, screenResolution(3)*0.4, 2, obj.engine);
 
             obj.pauseTask(2);
             obj.purge();
+        end
+
+        function initParameters(obj, controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate)
+            initParameters@CSTask(obj, controller, nSystem, difficultyUpdater, taskRunner, updateRate);
+            obj.engine = engine;
         end
 
         function updateTask(obj, dt)

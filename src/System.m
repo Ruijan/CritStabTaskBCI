@@ -43,10 +43,10 @@ classdef System < handle
             end
         end
         
-        function setInput(obj, newInput)
+        function setInput(obj, newInput, minInput, maxInput)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
-            obj.input = newInput;
+            obj.input = (newInput - (maxInput + minInput) / 2) / ((maxInput - minInput) / 2) * obj.boundary;
         end
 
         function reachedLimit = exploded(obj)

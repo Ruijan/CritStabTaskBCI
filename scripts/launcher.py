@@ -24,7 +24,7 @@ def validateSubject(button):
 		createPath(subject)
 		xml = createXML(subject,age)
 		app.stop()
-		print(xml)
+		print(subject)
 	elif button == "Cancel":
 		app.setEntry("Subject","")
 		app.hideSubWindow("New Subject")
@@ -38,7 +38,7 @@ def chooseSubject(button):
 		subjectPath = dataPath + "/" + subject
 		createPath(subject)
 		xmlFile = subjectPath + "/mi_cst_prot.xml" 
-		print(xmlFile)
+		print(subject)
 		app.stop()
 	elif button == "Back":
 		app.hideSubWindow("Existing Subject")

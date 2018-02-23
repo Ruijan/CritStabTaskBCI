@@ -3,11 +3,14 @@ classdef EEGRecorder < ExternalRecorder & handle
 		loop
 		jump
 		config
+		ndf
 	end
 	methods 
-		function obj = EEGRecorder(loop)
+		function obj = EEGRecorder(loop, config)
 			obj@ExternalRecorder();
 			obj.loop = loop;
+			obj.config = config;
+			obj.data = struct('eeg', [], 'trigger', [], 'time', []);
 		end
 
 		function init(obj)
@@ -16,54 +19,35 @@ classdef EEGRecorder < ExternalRecorder & handle
                 error('EEGRecorder:Connection', 'Cannot connect to CNBI Loop.')
             end 
             obj.jump = ndf_jump();
-			obj.cfg  = ccfg_new();
-			loop.cfg.taskset  = cl_retrieveconfig(obj.getLoop(), 'mi', 'taskset');
-			[obj.cfg.exec, obj.cfg.pipe, obj.cfg.id, loop.cfg.ic] = ...
-				ccfgtaskset_getndf(loop.cfg.taskset);
-
-			
-			if isempty(loop.cfg.pipe)
-				errorMessage = ['[ndf_mi] NDF configuration failed, killing matlab: \n' ...
-					'  Pipename:   "' loop.cfg.pipe '"\n' ...
-					'  iC address: "' loop.cfg.ic '"\n' ...
-					'  iD address: "' loop.cfg.id '"'];
-				error(errorMessage);
-			end
-			ndf = obj.createNDF();
+            obj.config.init(obj.loop);
+			obj.createNDF();
 			disp('[ndf_mi] Receiving ACK...');
-			[ndf.conf, ndf.size] = ndf_ack(ndf.sink);
-			obj.initBuffer();
+			[obj.ndf.conf, obj.ndf.size] = ndf_ack(obj.ndf.sink);
 			disp('[ndf_mi] Receiving NDF frames...');
-			loop.jump.tic = ndf_tic();
+			obj.jump.tic = ndf_tic();
 		end
 
 		function update(obj)
-			loop.jump.toc = ndf_toc(loop.jump.tic);
-			loop.jump.tic = ndf_tic();
-			[ndf.frame, ndf.size] = ndf_read(ndf.sink, ndf.conf, ndf.frame);
-			buffer.tim = ndf_add2buffer(buffer.tim, ndf_toc(ndf.frame.timestamp));
-			buffer.eeg = ndf_add2buffer(buffer.eeg, ndf.frame.eeg);
-			%buffer.exg = ndf_add2buffer(buffer.exg, ndf.frame.exg);
-			buffer.tri = ndf_add2buffer(buffer.tri, ndf.frame.tri);
-			data = [data buffer];
-		end
+			obj.jump.toc = ndf_toc(obj.jump.tic);
+			obj.jump.tic = ndf_tic();
+			[obj.ndf.frame, obj.ndf.size] = ndf_read(obj.ndf.sink, obj.ndf.conf, obj.ndf.frame);
+			ndf_toc(obj.ndf.frame.timestamp);
 
-		function initBuffer(obj)
-			buffer.eeg = ndf_ringbuffer(ndf.conf.sf, ndf.conf.eeg_channels, 1.00);
-			buffer.tri = ndf_ringbuffer(ndf.conf.sf, ndf.conf.tri_channels, 1.00);
-			buffer.tim = ndf_ringbuffer(ndf.conf.sf/ndf.conf.samples, ndf.conf.tim_channels, 5.00);
+			obj.data.eeg 		= [obj.data.eeg; obj.ndf.frame.eeg];
+			obj.data.trigger 	= [obj.data.trigger; obj.ndf.frame.tri];
+			obj.data.time 		= [obj.data.time; obj.ndf.frame.timestamp];
 		end
 
 		function purge(obj)
 			obj.initBuffer();
-			data = [];
+			obj.data = struct('eeg', [], 'trigger', [], 'time', []);
 		end
 
-		function ndf = createNDF(obj)
-			ndf.conf  = {};
-			ndf.size  = 0;
-			ndf.frame = ndf_frame();
-			ndf.sink  = ndf_sink(loop.cfg.ndf.pipe);
+		function createNDF(obj)
+			obj.ndf.conf  = {};
+			obj.ndf.size  = 0;
+			obj.ndf.frame = ndf_frame();
+			obj.ndf.sink  = ndf_sink('/tmp/cl.pipe.ndf.2');
 		end
 	end
 end

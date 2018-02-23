@@ -3,14 +3,16 @@ function runCST(varargin)
 	addpath('src/interfaces')
 	defaultControllerMode 	= 'BCI';
 	defaultDisplayMode 		= 'Graphic';
+	defaultRecorder 		= 'EEG';
 	defaultRuns				= 4;
 	defaultTrialsPerRun 	= 15;
 	
 	p = inputParser;
-	addOptional(p,'controller',defaultControllerMode, @ControllerFactory.isValidController);
-	addOptional(p,'display',defaultDisplayMode,@isValidDisplay);
-	addOptional(p,'runs',defaultRuns,@isValidScalarPosNum);
-	addOptional(p,'trialsPerRun',defaultTrialsPerRun,@isValidScalarPosNum);
+	addOptional(p,'controller', defaultControllerMode, @ControllerFactory.isValidController);
+	addOptional(p,'display', defaultDisplayMode, @isValidDisplay);
+	addOptional(p,'runs', defaultRuns, @isValidScalarPosNum);
+	addOptional(p,'trialsPerRun', defaultTrialsPerRun, @isValidScalarPosNum);
+	addOptional(p,'recorder', defaultRecorder, @isValidRecorder);
 	parse(p,varargin{:});
 	if strcmp(p.Results.controller, 'Mouse') && ~strcmp(p.Results.display, 'Graphic') || ...
 		strcmp(p.Results.controller, 'BCI') && ~strcmp(p.Results.display, 'Graphic')
@@ -20,15 +22,19 @@ function runCST(varargin)
 	if strcmp(p.Results.controller, 'BCI')
 		taskRunnerMode = 'BCI';
 	end
-
-	controller 			= ControllerFactory.createController(p.Results.controller);
+	engine 				= [];
+	if strcmp(p.Results.display, 'Graphic')
+		engine = GraphicalEngine(2);
+	end
+	controller 			= ControllerFactory.createController(p.Results.controller, engine);
 	newSystem 			= SystemFactory.createSystem(p.Results.display);
 	task 				= CSTaskFactory.createCSTask(p.Results.display);
 	taskRunner 			= TaskRunnerFactory.createTaskRunner(taskRunnerMode, p.Results.runs, p.Results.trialsPerRun);
 	difficultyUpdater 	= QuestDifficultyUpdater(1.5, 5, 1.5, 0.75, 3.5, 0.99, 0.01);
-	engine 				= [];
-	if strcmp(p.Results.display, 'Graphic')
-		engine = GraphicalEngine(2);
+	if strcmp(p.Results.recorder, 'EEG')
+		eegRecorder 		= EEGRecorder(Loop(), LoopConfiguration());
+		eegRecorder.init();
+		task.addRecorder(eegRecorder);
 	end
 	taskUpdateRate 			= 50; % in Hz
 	task.maxTimePerTrial 	= 6;
@@ -43,6 +49,11 @@ function valid = isValidDisplay(displayMode)
 		valid = false;
 	end
 end
+
 function valid = isValidScalarPosNum (x)
 	valid = isnumeric(x) && isscalar(x) && (x > 0);
+end
+
+function valid = isValidRecorder (recorder)
+	valid = ischar(recorder);
 end

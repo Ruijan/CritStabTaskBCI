@@ -23,9 +23,9 @@ classdef GraphicalSystem < System & handle
 			windowSize = obj.engine.getWindowSize();
 			offset = windowSize(3)*0.1;
 			obj.gState = [offset + obj.state / obj.boundary * obj.gBoundary + obj.gBoundary windowSize(4) / 2];
-			obj.gInput = [offset + obj.input / obj.boundary * obj.gBoundary + obj.gBoundary windowSize(4) / 3];
+			% obj.gInput = [offset + obj.input / obj.boundary * obj.gBoundary + obj.gBoundary windowSize(4) / 3];
 			obj.engine.drawArc(obj.engine.getWhiteIndex(), obj.gState, 10, 0, 360);
-			obj.engine.drawArc(obj.engine.getWhiteIndex(), obj.gInput, 10, 0, 360);
+			% obj.engine.drawArc(obj.engine.getWhiteIndex(), obj.gInput, 10, 0, 360);
 
 			obj.engine.drawFilledRect(obj.engine.getWhiteIndex(), [obj.gBoundary * 2 + offset windowSize(4)/2], [10 600]);
 			obj.engine.drawFilledRect(obj.engine.getWhiteIndex(), [offset windowSize(4)/2], [10 600]);
