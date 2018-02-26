@@ -17,27 +17,23 @@ classdef CSTask < handle
     end
     
     methods
-        function obj = CSTask()
+        function obj = CSTask(controller, nSystem, difficultyUpdater, taskRunner, updateRate)
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
+            obj.updateRate          = updateRate;
+            obj.controller          = controller;
+            obj.unstableSystem      = nSystem;
+            obj.difficultyUpdater   = difficultyUpdater;
+            obj.taskRunner          = taskRunner;
         end
 
-        function init(obj, controller, nSystem, difficultyUpdater, taskRunner, updateRate)
+        function init(obj)
             disp('Init CSTTask');
-            obj.initParameters(controller, nSystem, difficultyUpdater, taskRunner, updateRate);
             obj.controller.initController();
         end
 
         function addRecorder(obj, recorder)
             obj.recorders = [obj.recorders recorder];
-        end
-
-        function initParameters(obj, controller, System, difficultyUpdater, taskRunner, updateRate)
-            obj.updateRate          = updateRate;
-            obj.controller          = controller;
-            obj.unstableSystem      = System;
-            obj.difficultyUpdater   = difficultyUpdater;
-            obj.taskRunner          = taskRunner;
         end
 
         function start(obj)
@@ -134,7 +130,7 @@ classdef CSTask < handle
                 'TaskRunner', obj.taskRunner, ...
                 'ITR', obj.ITRMemory);
             for recorderIndex = 1:length(obj.recorders)
-                % We need to remove chars that could be mistaken as commands
+                % We need to remove chararacters from struct fieldnames that could be mistaken as commands
                 disp('Add EEG data to trial')
                 recorderName = (class(obj.recorders(recorderIndex)));
                 recorderName(recorderName == '.') = '';
@@ -153,4 +149,3 @@ classdef CSTask < handle
         end
     end
 end
-

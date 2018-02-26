@@ -72,9 +72,11 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
             testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.isDone), false);
             testCase.assignOutputsWhen(withExactInputs(testCase.controllerMock.behavior.update), true);
             testCase.assignOutputsWhen(get(testCase.controllerMock.behavior.input), 0.7);
+            testCase.assignOutputsWhen(get(testCase.controllerMock.behavior.minInput), 100);
+            testCase.assignOutputsWhen(get(testCase.controllerMock.behavior.maxInput), 200);
             testCase.task.update(dt);
             testCase.verifyCalled(testCase.systemMock.behavior.update(dt));
-            testCase.verifyCalled(testCase.systemMock.behavior.setInput(0.7));
+            testCase.verifyCalled(testCase.systemMock.behavior.setInput(0.7, 100, 200));
             testCase.verifyThat(withExactInputs(testCase.recorderMock.behavior.update()), WasCalled('WithCount',2));
         end
 

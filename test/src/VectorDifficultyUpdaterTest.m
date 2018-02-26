@@ -8,7 +8,7 @@ classdef VectorDifficultyUpdaterTest < matlab.mock.TestCase & handle
             import matlab.unittest.TestCase
             import matlab.mock.constraints.WasCalled;
             import matlab.unittest.constraints.IsAnything;
-            testCase.updater = VectorDifficultyUpdater();
+            
         end
     end
     methods (TestClassSetup)
@@ -20,18 +20,22 @@ classdef VectorDifficultyUpdaterTest < matlab.mock.TestCase & handle
         %% Test Method Block
     methods (Test)
 		function testEvaluatorCreation(testCase)
-        end
-
-        function testInit(testCase)
             values = [0.1 0.5 0.8 0.9 1.5 2.0];
-            testCase.updater.init(values);
-            testCase.verifyEqual(testCase.updater.values, values)
+            testCase.updater = VectorDifficultyUpdater(values);
             testCase.verifyEqual(testCase.updater.values, values)
         end
 
-        function testUpdateWithoutWeight(testCase)
+        function testEvaluatorCreationWithWeight(testCase)
             values = [0.1 0.5 0.8 0.9 1.5 2.0];
-            testCase.updater.init(values);
+            newWeigths = [5     5   30  15  5   60];
+            testCase.updater = VectorDifficultyUpdater(values, newWeigths);
+            testCase.verifyEqual(testCase.updater.values, values)
+            testCase.verifyEqual(testCase.updater.weights, newWeigths ./ sum(newWeigths))
+        end
+
+        function testGetNewDifficulty(testCase)
+            values = [0.1 0.5 0.8 0.9 1.5 2.0];
+            testCase.updater = VectorDifficultyUpdater(values);
             occurences = zeros(length(values),1);
             iterations = 500;
             for step = 1:iterations
@@ -44,10 +48,10 @@ classdef VectorDifficultyUpdaterTest < matlab.mock.TestCase & handle
             testCase.verifyEqual(h, 0);
         end
 
-        function testUpdateWithWeight(testCase)
+        function testGetNewDifficultyWeight(testCase)
             values = [0.1   0.5 0.8 0.9 1.5 2.0];
             weigths = [5     5   30  15  5   60];
-            testCase.updater.init(values, weigths);
+            testCase.updater = VectorDifficultyUpdater(values, weigths);
             occurences = zeros(length(values),1);
             iterations = 500;
             for step = 1:iterations

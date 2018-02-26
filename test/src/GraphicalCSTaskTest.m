@@ -1,10 +1,10 @@
 classdef GraphicalCSTaskTest < matlab.mock.TestCase & handle
 	properties
-        runs = 4,
-        trialsPerRun = 15,
+        taskRunnerMock,
         engineMock,
         controllerMock,
         systemMock,
+        difficultyUpdaterMock,
         graphicalCSTask,
         updateRate = 50
     end
@@ -13,10 +13,18 @@ classdef GraphicalCSTaskTest < matlab.mock.TestCase & handle
             import matlab.unittest.TestCase
             import matlab.mock.constraints.WasCalled;
             import matlab.unittest.constraints.IsAnything;
-            testCase.engineMock = GraphicalEngineMock(testCase);
+            testCase.engineMock     = GraphicalEngineMock(testCase);
             testCase.controllerMock = ControllerMock(testCase);
-            testCase.systemMock = SystemMock(testCase);
-            testCase.graphicalCSTask =  GraphicalCSTask();
+            testCase.systemMock     = SystemMock(testCase);
+            testCase.taskRunnerMock = TaskRunnerMock(testCase);
+            testCase.difficultyUpdaterMock = DifficultyUpdaterMock(testCase);
+            testCase.graphicalCSTask =  GraphicalCSTask(...
+                testCase.controllerMock.stub, ...
+                testCase.engineMock.stub, ...
+                testCase.systemMock.stub, ...
+                testCase.difficultyUpdaterMock.stub, ...
+                testCase.taskRunnerMock.stub, ...
+                testCase.updateRate);
         end
     end
     methods (TestClassSetup)
@@ -29,26 +37,25 @@ classdef GraphicalCSTaskTest < matlab.mock.TestCase & handle
     methods (Test)
         % includes unit test functions
         function testGraphicalCSTaskCreation(testCase)
-
-            testCase.verifyEqual(testCase.graphicalCSTask.currentTrial, 1);
-            testCase.verifyEqual(testCase.graphicalCSTask.currentRun, 1);
-            
-        end
-
-        function testGraphicalCSTaskInitialization(testCase)
-            testCase.initTask();
-            screenResolution = get(0,'screensize');
-            set(0,'units','pixels');
-            testCase.verifyCalled(withExactInputs(testCase.controllerMock.behavior.initController()));
-            testCase.verifyCalled(testCase.systemMock.behavior.init(...
-                1.5, screenResolution(1)*0.8, screenResolution(1)*0.8, 2, testCase.engineMock));
-            testCase.verifyCalled(testCase.engineMock.behavior.openWindow(get(0,'screensize')));
             testCase.verifyEqual(testCase.graphicalCSTask.updateRate, testCase.updateRate);
             testCase.verifyEqual(testCase.graphicalCSTask.unstableSystem, testCase.systemMock.stub);
             testCase.verifyEqual(testCase.graphicalCSTask.controller, testCase.controllerMock.stub);
             testCase.verifyEqual(testCase.graphicalCSTask.engine, testCase.engineMock.stub);
-            testCase.verifyEqual(testCase.graphicalCSTask.runs, testCase.runs);
-            testCase.verifyEqual(testCase.graphicalCSTask.trialsPerRun, testCase.trialsPerRun);
+            testCase.verifyEqual(testCase.graphicalCSTask.difficultyUpdater, testCase.difficultyUpdaterMock.stub);
+            testCase.verifyEqual(testCase.graphicalCSTask.taskRunner, testCase.taskRunnerMock.stub);
+        end
+
+        function testGraphicalCSTaskInitialization(testCase)
+            import matlab.unittest.constraints.IsAnything;
+            testCase.assignOutputsWhen(get(testCase.taskRunnerMock.behavior.results), [])
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getCenter), [250 250])
+            testCase.graphicalCSTask.init();
+            screenResolution = get(0,'screensize');
+            set(0,'units','pixels');
+            testCase.verifyCalled(withExactInputs(testCase.controllerMock.behavior.initController()));
+            testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getCenter()));
+            testCase.verifyCalled(testCase.systemMock.behavior.init(...
+                1.5, screenResolution(3)*0.4, screenResolution(3)*0.4, 2, IsAnything));
         end
 
         function testObjectDestruction(testCase)
@@ -77,14 +84,5 @@ classdef GraphicalCSTaskTest < matlab.mock.TestCase & handle
             testCase.verifyNotCalled(withExactInputs(testCase.engineMock.behavior.updateScreen()));
         end
     end
-    methods
-        function initTask(testCase)
-            testCase.graphicalCSTask.init(testCase.controllerMock.stub, ...
-                testCase.engineMock.stub, ...
-                testCase.systemMock.stub, ...
-                testCase.runs, ...
-                testCase.trialsPerRun,...
-                testCase.updateRate);
-        end
-    end
+
 end

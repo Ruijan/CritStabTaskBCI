@@ -10,7 +10,7 @@ classdef MouseControllerTest < matlab.mock.TestCase & handle
             import matlab.mock.constraints.WasCalled;
             import matlab.unittest.constraints.IsAnything;
             testCase.engineMock = GraphicalEngineMock(testCase);
-            testCase.controller =  MouseController();
+            testCase.controller =  MouseController(testCase.engineMock.stub);
         end
     end
     
@@ -26,24 +26,53 @@ classdef MouseControllerTest < matlab.mock.TestCase & handle
         function testMouseControllerCreation(testCase)
             testCase.verifyEqual(testCase.controller.input,         0);
             testCase.verifyEmpty(testCase.controller.inputMemory,   0);
-        end
-
-        function testMouseControllerInit(testCase)
-            testCase.controller.initController(testCase.engineMock.stub);
             testCase.verifyEqual(testCase.controller.engine,   ...
                 testCase.engineMock.stub);
         end
 
+        function testMouseControllerInit(testCase)
+            minInput = 0;
+            maxInput = 1920;
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getWindowSize), [0 0 maxInput 1080]);
+            testCase.controller.initController();
+            testCase.verifyEqual(testCase.controller.minInput, minInput);
+            testCase.verifyEqual(testCase.controller.maxInput, maxInput);
+        end
+
         function testMouseControllerUpdate(testCase)
-            testCase.controller.initController(testCase.engineMock.stub);
+            minInput = 0;
+            maxInput = 1920;
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getWindowSize), [0 0 maxInput 1080]);
             testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getMousePosition), [250, 350]);
-            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getCenter), [150, 200]);
             updated = testCase.controller.update();
             testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getMousePosition()));
-            testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getCenter()));
             testCase.verifyEqual(updated, true);
-            testCase.verifyEqual(testCase.controller.input, 100);
-            testCase.verifyEqual(testCase.controller.inputMemory, [100]);
+            testCase.verifyEqual(testCase.controller.input, 250);
+            testCase.verifyEqual(testCase.controller.inputMemory, [250]);
+        end
+
+        function testMouseControllerUpdateWithLowerInput(testCase)
+            minInput = 0;
+            maxInput = 1920;
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getWindowSize), [0 0 maxInput 1080]);
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getMousePosition), [-200, 350]);
+            updated = testCase.controller.update();
+            testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getMousePosition()));
+            testCase.verifyEqual(updated, true);
+            testCase.verifyEqual(testCase.controller.input, 0);
+            testCase.verifyEqual(testCase.controller.inputMemory, [0]);
+        end
+
+        function testMouseControllerUpdateWithHigherInput(testCase)
+            minInput = 0;
+            maxInput = 1920;
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getWindowSize), [0 0 maxInput 1080]);
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getMousePosition), [maxInput + 200, 350]);
+            updated = testCase.controller.update();
+            testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getMousePosition()));
+            testCase.verifyEqual(updated, true);
+            testCase.verifyEqual(testCase.controller.input, maxInput);
+            testCase.verifyEqual(testCase.controller.inputMemory, [maxInput]);
         end
     end
 end

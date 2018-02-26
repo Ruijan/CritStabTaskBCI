@@ -15,16 +15,19 @@ classdef MouseController < handle & Controller
         end
 
         function initController(obj)
-            windowSize = p.Results.engine.getWindowSize();
-            obj.minInput = obj.engine.windowSize(3);
+            windowSize = obj.engine.getWindowSize();
+            obj.minInput = 0;
+            obj.maxInput = windowSize(3);
         end
         
         function updated = update(obj)
             % position = obj.engine.getMousePosition() - obj.engine.getCenter();
             position = obj.engine.getMousePosition();
             obj.input = position(1);
-            if abs(obj.input) > obj.engine.windowSize(3)
-                obj.input = sign(obj.input) * obj.engine.windowSize(3);
+            if obj.input > obj.maxInput
+                obj.input = sign(obj.input) * obj.maxInput;
+            elseif obj.input < obj.minInput
+                obj.input = sign(obj.input) * obj.minInput;
             end
             obj.inputMemory = [obj.inputMemory obj.input];
             updated = true;

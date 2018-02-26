@@ -8,7 +8,7 @@ classdef QuestDifficultyUpdaterTest < matlab.mock.TestCase & handle
             import matlab.unittest.TestCase
             import matlab.mock.constraints.WasCalled;
             import matlab.unittest.constraints.IsAnything;
-            testCase.updater = QuestDifficultyUpdater();
+            testCase.updater = QuestDifficultyUpdater(3.5, 5, 1.5, 0.8, 3.5, 0.99, 0.51);
         end
     end
     methods (TestClassSetup)
@@ -23,7 +23,6 @@ classdef QuestDifficultyUpdaterTest < matlab.mock.TestCase & handle
         end
 
         function testInit(testCase)
-            testCase.updater.init(3.5, 5, 1.5, 0.8, 3.5, 0.99, 0.51);
             testCase.verifyEqual(testCase.updater.prior, 3.5);
             testCase.verifyEqual(testCase.updater.maxValue, 5);
             testCase.verifyEqual(testCase.updater.priorStd, 1.5);
@@ -36,14 +35,13 @@ classdef QuestDifficultyUpdaterTest < matlab.mock.TestCase & handle
         function testUpdate(testCase)
             x = 0:0.1:10;
             y = sigmf(x,[2 4]);
-            testCase.updater.init(3.5, 10, 0.5, 0.5, 3.5, 0.99, 0.01);
-            for step = 1:150
+            for step = 1:300
                 lambda = testCase.updater.getNewDifficulty();
                 prob = y(abs(x - round(lambda,1)) < 0.001);
                 response = rand() < prob;
-                testCase.updater.updateQuest(lambda, response);
+                testCase.updater.update(lambda, response);
             end
-            testCase.verifyEqual(abs(lambda - 4) < 0.15, true)
+            testCase.verifyEqual(abs(lambda - 4.75) < 0.15, true)
         end
 	end
 end

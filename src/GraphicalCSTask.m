@@ -7,32 +7,25 @@ classdef GraphicalCSTask < handle & CSTask
     end
     
     methods
-        function obj = GraphicalCSTask()
+        function obj = GraphicalCSTask(controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate)
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
-            obj@CSTask();
-            
+            obj@CSTask(controller, nSystem, difficultyUpdater, taskRunner, updateRate);
+            obj.engine = engine;            
         end
 
-        function init(obj, controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate)
+        function init(obj)
             disp('Init Task')
-
-            obj.initParameters(controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate);
+            init@CSTask(obj);
             set(0,'units','pixels');
             screenResolution = get(0,'screensize');
 
             obj.engine.openWindow(screenResolution - [1 1 1 1]);
 
-            obj.unstableSystem.init(1.5, ...
-                screenResolution(3)*0.4, screenResolution(3)*0.4, 2, obj.engine);
+            obj.unstableSystem.init(1.5, screenResolution(3)*0.4, screenResolution(3)*0.4, 2, obj.engine);
 
-            obj.pauseTask(2);
+            obj.pauseTask(2.0);
             obj.purge();
-        end
-
-        function initParameters(obj, controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate)
-            initParameters@CSTask(obj, controller, nSystem, difficultyUpdater, taskRunner, updateRate);
-            obj.engine = engine;
         end
 
         function updateTask(obj, dt)
@@ -47,19 +40,19 @@ classdef GraphicalCSTask < handle & CSTask
 
         function switchRun(obj, dt)
             switchRun@CSTask(obj, dt);
-
         end
 
         function pauseTask(obj, pauseTime)
             tic;
             currentTime = toc;
+            outcome = 'Failure';
+            if isempty(obj.taskRunner.results)
+                outcome = 'Unknown';
+            elseif obj.taskRunner.results(end) == 1
+                outcome = 'Success';
+            end
             while currentTime < pauseTime
-                outcome = 'Failure';
-                if isempty(obj.taskRunner.results)
-                    outcome = 'Unknown';
-                elseif obj.taskRunner.results(end) == 1
-                    outcome = 'Success';
-                end
+                
                 obj.engine.drawText(['Break ' num2str(round(currentTime,1)) '/'...
                         num2str(pauseTime) '\n Trial ' num2str(obj.taskRunner.currentTrial) '/'...
                         num2str(obj.taskRunner.trialsPerRun) '\n Difficulty ' num2str(obj.unstableSystem.lambda) ...
