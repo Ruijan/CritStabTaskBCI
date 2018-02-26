@@ -41,8 +41,8 @@ classdef GraphicalCSTask < handle & CSTask
 
         function switchTrial(obj, dt)
             obj.pauseTask(obj.trialBreakTime);
-            obj.startFixationPeriod();
             switchTrial@CSTask(obj, dt);
+            obj.startFixationPeriod();
         end
 
         function switchRun(obj, dt)
@@ -81,6 +81,7 @@ classdef GraphicalCSTask < handle & CSTask
                 obj.engine.drawText('+', ...
                         obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
                 obj.engine.updateScreen();
+                obj.updateRecorders();
                 currentTime = toc;
             end
         end

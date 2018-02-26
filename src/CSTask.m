@@ -85,9 +85,7 @@ classdef CSTask < handle
                 obj.unstableSystem.setInput(obj.controller.input, obj.controller.minInput, obj.controller.maxInput);
             end
             obj.unstableSystem.update(dt);
-            for recorderIndex = 1:length(obj.recorders)
-                obj.recorders(recorderIndex).update();
-            end
+            obj.updateRecorders();
             obj.computeITR();
             obj.currentTime = obj.currentTime + dt;
             % disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.maxTimePerTrial)])
@@ -142,6 +140,12 @@ classdef CSTask < handle
 
         function done = isDone(obj)
             done = obj.userDone | obj.taskRunner.isDone();
+        end
+
+        function updateRecorders(obj)
+            for recorderIndex = 1:length(obj.recorders)
+                obj.recorders(recorderIndex).update();
+            end
         end
 
         function destroy(obj)
