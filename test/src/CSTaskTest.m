@@ -21,7 +21,11 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
             testCase.recorderMock = ExternalRecorderMock(testCase);
             testCase.taskRunnerMock = TaskRunnerMock(testCase);
             testCase.difficultyUpdaterMock = DifficultyUpdaterMock(testCase);
-            testCase.task =  CSTask();
+            testCase.task =  CSTask(testCase.controllerMock.stub, ...
+                testCase.systemMock.stub, ...
+                testCase.difficultyUpdaterMock.stub, ...
+                testCase.taskRunnerMock.stub, ...
+                testCase.updateRate);
 
         end
     end
@@ -38,20 +42,19 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
         function testCSTaskCreation(testCase)
             testCase.verifyEqual(testCase.task.controllerITR, 0);
             testCase.verifyEqual(testCase.task.ITRMemory, []);
-            testCase.verifyEqual(testCase.task.updateRate, 60);
             testCase.verifyEqual(testCase.task.maxTimePerTrial, 10);
             testCase.verifyEqual(testCase.task.currentTime, 0);
             testCase.verifyEqual(testCase.task.userDone, false);
+            testCase.verifyEqual(testCase.task.unstableSystem, testCase.systemMock.stub);
+            testCase.verifyEqual(testCase.task.controller, testCase.controllerMock.stub);
+            testCase.verifyEqual(testCase.task.taskRunner, testCase.taskRunnerMock.stub);
+            testCase.verifyEqual(testCase.task.difficultyUpdater, testCase.difficultyUpdaterMock.stub);
+            testCase.verifyEqual(testCase.task.updateRate, testCase.updateRate);
         end
 
         function testCSTaskInitialization(testCase)
             testCase.initTask();
 
-            testCase.verifyEqual(testCase.task.unstableSystem, testCase.systemMock.stub);
-            testCase.verifyEqual(testCase.task.controller, testCase.controllerMock.stub);
-            testCase.verifyEqual(testCase.task.taskRunner, testCase.taskRunnerMock.stub);
-            testCase.verifyEqual(testCase.task.updateRate, testCase.updateRate);
-            testCase.verifyEqual(testCase.task.difficultyUpdater, testCase.difficultyUpdaterMock.stub);
             testCase.verifyCalled(withExactInputs(testCase.controllerMock.behavior.initController()));
         end
 
@@ -119,11 +122,7 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
     end
     methods
         function initTask(testCase)
-            testCase.task.init(testCase.controllerMock.stub, ...
-                testCase.systemMock.stub, ...
-                testCase.difficultyUpdaterMock.stub, ...
-                testCase.taskRunnerMock.stub, ...
-                testCase.updateRate);
+            testCase.task.init();
         end
     end
 end

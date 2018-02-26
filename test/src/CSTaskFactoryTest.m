@@ -19,12 +19,16 @@ classdef CSTaskFactoryTest < matlab.mock.TestCase & handle
     end
     methods(Test)
     	function testGraphicCSTaskCreation(testCase)
-    		task = testCase.factory.createCSTask('Graphic');
+            import matlab.unittest.constraints.IsAnything;
+    		task = testCase.factory.createCSTask('Graphic', ...
+                IsAnything, IsAnything, IsAnything, IsAnything, IsAnything, IsAnything);
     		testCase.verifyEqual(class(task),'GraphicalCSTask');
     	end
 
     	function testHiddenCSTaskCreation(testCase)
-    		task = testCase.factory.createCSTask('None');
+            import matlab.unittest.constraints.IsAnything;
+            task = testCase.factory.createCSTask('None', ...
+                IsAnything, IsAnything, IsAnything, IsAnything, IsAnything);
     		testCase.verifyEqual(class(task),'CSTask');
     	end
 

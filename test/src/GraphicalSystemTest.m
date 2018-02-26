@@ -49,25 +49,20 @@ classdef GraphicalSystemTest < matlab.mock.TestCase & handle
         end
 
         function testGraphicalSystemUpdate(testCase)
-            success = false;
-            windowSize = [1680 1050];
+            import matlab.unittest.constraints.IsAnything;
             testCase.graphicalSystem.init(testCase.lambda, ...
                 testCase.boundary,...
                 testCase.gBoundary, ...
                 testCase.timeLimit, ...
                 testCase.engineMock.stub);
-            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getWindowSize), windowSize);
-            testCase.graphicalSystem.setInput(0.01);
-            testCase.graphicalSystem.update(0.01);
 
-            state       = testCase.boundary / exp(testCase.lambda*2)
-            testCase.verifyEqual(testCase.graphicalSystem.input, 0.01);
-            testCase.verifyEqual(testCase.graphicalSystem.state, exp(testCase.lambda*0.01) * state + (exp(testCase.lambda*0.01) - 1)*0.01);
-            testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getWhiteIndex));
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getWindowSize), [0 0 1920 1050])
+            testCase.graphicalSystem.update(0.01)
             testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getWindowSize));
-            visualState = [testCase.graphicalSystem.state / testCase.boundary * windowSize(1) windowSize(2) / 2];
-            testCase.verifyEqual(testCase.graphicalSystem.gState, visualState);
-                % testCase.verifyCalled(testCase.graphicalSystem.engine.drawArc(IsAnything, IsAnything, IsAnything, [IsAnything]));
+            testCase.verifyCalled(testCase.engineMock.behavior.drawArc(IsAnything, IsAnything, IsAnything, IsAnything, IsAnything));
+            testCase.verifyCalled(testCase.engineMock.behavior.drawFilledRect(IsAnything, IsAnything, IsAnything));
+            testCase.verifyCalled(testCase.engineMock.behavior.drawFilledRect(IsAnything, IsAnything, IsAnything));
+
         end
     end
 end

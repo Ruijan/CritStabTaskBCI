@@ -47,13 +47,11 @@ classdef GraphicalCSTaskTest < matlab.mock.TestCase & handle
 
         function testGraphicalCSTaskInitialization(testCase)
             import matlab.unittest.constraints.IsAnything;
-            testCase.assignOutputsWhen(get(testCase.taskRunnerMock.behavior.results), [])
-            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getCenter), [250 250])
-            testCase.graphicalCSTask.init();
+            testCase.initTask();
             screenResolution = get(0,'screensize');
             set(0,'units','pixels');
             testCase.verifyCalled(withExactInputs(testCase.controllerMock.behavior.initController()));
-            testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.getCenter()));
+            testCase.verifyCalled(testCase.engineMock.behavior.openWindow(IsAnything));
             testCase.verifyCalled(testCase.systemMock.behavior.init(...
                 1.5, screenResolution(3)*0.4, screenResolution(3)*0.4, 2, IsAnything));
         end
@@ -65,24 +63,18 @@ classdef GraphicalCSTaskTest < matlab.mock.TestCase & handle
         end
 
         function testUpdate(testCase)
-            testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), false)
+            testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), true)
             testCase.initTask();
-            testCase.graphicalCSTask.update(0.01);
+            testCase.graphicalCSTask.updateTask(0.01);
             testCase.verifyCalled(withExactInputs(testCase.engineMock.behavior.updateScreen()));
-            testCase.verifyCalled(withExactInputs(testCase.systemMock.behavior.exploded()));
-            testCase.verifyCalled(withExactInputs(testCase.controllerMock.behavior.update()));
-            testCase.verifyCalled(testCase.systemMock.behavior.update(0.01));
-        end
-
-        function testMaxRunReachedDone(testCase)
-            testCase.initTask();
-            testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), false);
-            testCase.graphicalCSTask.currentRun = 5;
-            testCase.graphicalCSTask.update(0.01);
-            testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.exploded()));
-            testCase.verifyNotCalled(withExactInputs(testCase.systemMock.behavior.update()));
-            testCase.verifyNotCalled(withExactInputs(testCase.engineMock.behavior.updateScreen()));
         end
     end
+    methods 
 
+        function initTask(testCase)
+            testCase.assignOutputsWhen(get(testCase.taskRunnerMock.behavior.results), [])
+            testCase.assignOutputsWhen(withExactInputs(testCase.engineMock.behavior.getCenter), [250 250])
+            testCase.graphicalCSTask.init();
+        end
+    end 
 end

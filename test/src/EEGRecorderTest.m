@@ -1,7 +1,8 @@
 classdef EEGRecorderTest < matlab.mock.TestCase & handle
 	properties
 		recorder,
-        loopMock
+        loopMock,
+        loopConfigMock
 	end
 	methods(TestMethodSetup)
         function createGraphicalCSTask(testCase)
@@ -9,7 +10,10 @@ classdef EEGRecorderTest < matlab.mock.TestCase & handle
             import matlab.mock.constraints.WasCalled;
             import matlab.unittest.constraints.IsAnything;
             testCase.loopMock = LoopMock(testCase);
-            testCase.recorder =  EEGRecorder(testCase.loopMock.stub);
+            testCase.loopConfigMock = LoopConfigurationMock(testCase);
+            testCase.recorder =  EEGRecorder(...
+                testCase.loopMock.stub, ...
+                testCase.loopConfigMock.stub);
         end
     end
 
@@ -22,9 +26,10 @@ classdef EEGRecorderTest < matlab.mock.TestCase & handle
         %% Test Method Block
     methods (Test)
     	function testEEGRecorderCreation(testCase)
-    		testCase.verifyEqual(testCase.recorder.data, []);
+    		testCase.verifyEqual(testCase.recorder.data, struct('eeg', [], 'trigger', [], 'time', []));
     		testCase.verifyEqual(testCase.recorder.timestamp, []);
             testCase.verifyEqual(testCase.recorder.loop, testCase.loopMock.stub);
+            testCase.verifyEqual(testCase.recorder.config, testCase.loopConfigMock.stub);
     	end
 
         function testFailedToConnectToLoopShouldThrow(testCase)

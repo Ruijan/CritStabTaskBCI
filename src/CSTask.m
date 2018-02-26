@@ -90,8 +90,8 @@ classdef CSTask < handle
             end
             obj.computeITR();
             obj.currentTime = obj.currentTime + dt;
-            disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.maxTimePerTrial)])
-            disp(['Current ITR : ' num2str(obj.controllerITR)])
+            % disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.maxTimePerTrial)])
+            % disp(['Current ITR : ' num2str(obj.controllerITR)])
         end
 
         function computeITR(obj)
