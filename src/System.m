@@ -15,15 +15,15 @@ classdef System < handle
     end
     
     methods
-        function obj = System()
+        function obj = System(lambda, boundary, expectedTimeLimit)
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
-        end
-
-        function init(obj, lambda, boundary, expectedTimeLimit)
             obj.lambda      = lambda;
             obj.boundary    = boundary;
             obj.expectedTimeLimit = expectedTimeLimit;
+        end
+
+        function init(obj)
             obj.initState();
         end
 
@@ -50,9 +50,6 @@ classdef System < handle
         end
 
         function reachedLimit = exploded(obj)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            % disp([ 'State ' num2str(obj.state) ' Boundary ' num2str(obj.boundary)]);
             reachedLimit = (abs(obj.state) - obj.boundary) >= 0;
         end
 

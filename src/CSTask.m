@@ -30,6 +30,7 @@ classdef CSTask < handle
         function init(obj)
             disp('Init CSTTask');
             obj.controller.initController();
+            obj.unstableSystem.init();
         end
 
         function addRecorder(obj, recorder)
@@ -81,7 +82,7 @@ classdef CSTask < handle
         end
 
         function runTrial(obj, dt)
-            if(obj.controller.update())
+            if(obj.controller.update(dt))
                 obj.unstableSystem.setInput(obj.controller.input, obj.controller.minInput, obj.controller.maxInput);
             end
             obj.unstableSystem.update(dt);

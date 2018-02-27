@@ -15,6 +15,7 @@ classdef EEGRecorder < ExternalRecorder & handle
 
 		function init(obj)
 			% Connect to the CnbiTk loop
+			obj.loop.addPaths();
             if(obj.loop.connect() == false)
                 error('EEGRecorder:Connection', 'Cannot connect to CNBI Loop.')
             end 

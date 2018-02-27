@@ -62,7 +62,12 @@ else
 	storedir="${HOME}/data/BCICourse/"
 	
 	block=$DEFAULT_MI_BLOCK
-	executable='ptb3-matlab -nodesktop -nosplash -r runCSTBCI -sd /home/cnbi/dev/CritStabTaskBCI/ -useStartupFolderPref'
+	executable=''
+	if [ "$modality" == "online" ]; then
+		executable='ptb3-matlab -nodesktop -nosplash -r runCSTBCI -sd /home/cnbi/dev/CritStabTaskBCI/ -useStartupFolderPref'
+	else
+		executable='ptb3-matlab -nodesktop -nosplash -r runCSTOffline -sd /home/cnbi/dev/CritStabTaskBCI/ -useStartupFolderPref'
+	fi
 	if [ "$taskset" == "mi_hand" ]; then
 		executable=$(ccfg_cli -x $xml -M $modality -B $block -p)
 	fi

@@ -4,18 +4,18 @@ classdef GraphicalSystem < System & handle
 		gBoundary 	= 0,
 		gState 		= 0,
 		gInput 		= 0,
-		showInput 	= false,
+		showInput 	= true,
 		engine
 	end
 	methods
-		function obj = GraphicalSystem()
-			obj@System();
-		end
-
-		function init(obj, lambda, boundary, gBoundary, expectedTimeLimit, nEngine)
-			init@System(obj, lambda, boundary, expectedTimeLimit);
+		function obj = GraphicalSystem(lambda, boundary, gBoundary, expectedTimeLimit, nEngine)
+			obj@System(lambda, boundary, expectedTimeLimit);
 			obj.gBoundary = gBoundary;
 			obj.engine = nEngine;
+		end
+
+		function init(obj)
+			init@System(obj);
 		end
 
 		function update(obj, dt)

@@ -26,8 +26,8 @@ function runCST(varargin)
 	if strcmp(p.Results.display, 'Graphic')
 		engine = GraphicalEngine(2);
 	end
-	controller 			= ControllerFactory.createController(p.Results.controller, engine);
-	newSystem 			= SystemFactory.createSystem(p.Results.display);
+	newSystem 			= SystemFactory.createSystem(p.Results.display, engine);
+	controller 			= ControllerFactory.createController(p.Results.controller, engine, newSystem);
 	taskRunner 			= TaskRunnerFactory.createTaskRunner(taskRunnerMode, p.Results.runs, p.Results.trialsPerRun);
 	difficultyUpdater 	= QuestDifficultyUpdater(1.5, 5, 1.5, 0.75, 3.5, 0.99, 0.01);
 	task 				= CSTaskFactory.createCSTask(...
@@ -42,8 +42,7 @@ function runCST(varargin)
 		eegRecorder.init();
 		task.addRecorder(eegRecorder);
 	end
-	taskUpdateRate 			= 50; % in Hz
-	task.maxTimePerTrial 	= 6;
+	task.maxTimePerTrial 	= 9;
 	task.init();
 	task.start();
 	task.destroy();

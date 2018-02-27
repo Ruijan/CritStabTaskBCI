@@ -12,10 +12,11 @@ classdef Controller < handle
         end
         function purge(obj)
             obj.inputMemory = [];
+            obj.input       = 0;
         end
     end
     methods(Abstract)
     	initController(obj)
-    	updated = update(obj)
+    	updated = update(obj, dt)
 	end
 end

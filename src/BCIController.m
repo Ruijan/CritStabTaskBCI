@@ -25,7 +25,7 @@ classdef BCIController < handle & Controller
             obj.checkTICAttached();
         end
         
-        function updated = update(obj)
+        function updated = update(obj, dt)
             updated = false;
             obj.checkLoopConnection();
             obj.checkTICAttached();

@@ -4,6 +4,7 @@ classdef ControllerFactory < handle
 			p = inputParser;
 			addRequired(p,'mode', @ControllerFactory.isValidController);
 			addOptional(p,'engine', @ControllerFactory.isValidEngine);
+			addOptional(p,'system', @ControllerFactory.isValidSystem);
 			parse(p,varargin{:});
 
 			if strcmp(p.Results.mode, 'Mouse')
@@ -15,6 +16,9 @@ classdef ControllerFactory < handle
 				loop = Loop();
 				tobiICGet = TobiICGet(loop);
 				controller = BCIController(loop, tobiICGet);
+			elseif strcmp(p.Results.mode, 'Training')
+				disp('Create training Controller');
+				controller = TrainingController(p.Results.system);
 			end
 		end
 
@@ -22,6 +26,7 @@ classdef ControllerFactory < handle
 			valid = true;
 			if ~ischar(controllerMode) || (~strcmp(controllerMode,'Mouse') && ...
 				~strcmp(controllerMode,'LQR') && ...
+				~strcmp(controllerMode,'Training') && ...
 				~strcmp(controllerMode,'BCI') && ...
 				~strcmp(controllerMode,'Keyboard') && ...
 				~strcmp(controllerMode,'None'))
@@ -32,6 +37,13 @@ classdef ControllerFactory < handle
 		function valid = isValidEngine(engine)
 			valid = true;
 			if ~strcmp(class(engine),'GraphicalEngine')
+				valid = false;
+			end
+		end
+
+		function valid = isValidSystem(unstableSystem)
+			valid = true;
+			if ~strcmp(class(unstableSystem),'System')
 				valid = false;
 			end
 		end

@@ -20,7 +20,7 @@ classdef MouseController < handle & Controller
             obj.maxInput = windowSize(3);
         end
         
-        function updated = update(obj)
+        function updated = update(obj, dt)
             % position = obj.engine.getMousePosition() - obj.engine.getCenter();
             position = obj.engine.getMousePosition();
             obj.input = position(1);

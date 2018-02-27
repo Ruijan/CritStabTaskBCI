@@ -21,13 +21,14 @@ classdef GraphicalCSTask < handle & CSTask
             set(0,'units','pixels');
             screenResolution = get(0,'screensize');
             obj.engine.openWindow(screenResolution - [1 1 1 1]);
-            obj.unstableSystem.init(1.5, screenResolution(3)*0.4, screenResolution(3)*0.4, 2, obj.engine);
             init@CSTask(obj);
         end
         function start(obj)
             obj.pauseTask(2.0);
             obj.purge();
+            obj.startFixationPeriod();
             start@CSTask(obj);
+
         end
 
         function updateTask(obj, dt)
