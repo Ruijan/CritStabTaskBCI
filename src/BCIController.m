@@ -39,6 +39,8 @@ classdef BCIController < handle & Controller
             if(obj.loop.isConnected() == false)
                 if(obj.loop.connect() == false)
                     error('BCIController:Connection', 'Cannot connect to CNBI Loop.')
+                else
+                    warning('Had to reconnect to loop.')
                 end
             end 
         end
@@ -46,6 +48,8 @@ classdef BCIController < handle & Controller
             if(obj.tobiICGet.isAttached() == false)
                 if(obj.tobiICGet.attach('/ctrl1') == false)
                     error('BCIController:TICConnection', 'Cannot connect to attach TobiIC to CNBI Loop.')
+                else
+                    warning('Had to reattach TobiIC to loop.')
                 end
             end 
         end

@@ -19,7 +19,6 @@ classdef GraphicalSystem < System & handle
 		end
 
 		function update(obj, dt)
-			disp('Update Graphical system');
 			update@System(obj, dt);
 			windowSize = obj.engine.getWindowSize();
 			offset = windowSize(3)*0.1;

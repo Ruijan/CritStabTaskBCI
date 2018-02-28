@@ -7,30 +7,42 @@ classdef CSTask < handle
         unstableSystem,
         difficultyUpdater,
         taskRunner,
-        recorders       = [],
-        controllerITR   = 0,
-        ITRMemory       = [],
-        updateRate      = 60,
-        maxTimePerTrial = 10,
-        currentTime     = 0,
-        userDone        = false
+        taskTimeProperties,
+        state,
+        recorders           = [],
+        controllerITR       = 0, % bits/second
+        ITRMemory           = [],
+        currentTime         = 0, % second
+        userDone            = false   
+    end
+    properties (Constant)
+        Created         = 0, 
+        Initialized     = 1, 
+        Baseline        = 2, 
+        RunTrial        = 3, 
+        Break           = 4, 
+        SwitchTrial     = 5, 
+        SwitchRun       = 6
     end
     
     methods
-        function obj = CSTask(controller, nSystem, difficultyUpdater, taskRunner, updateRate)
+        function obj = CSTask(taskTimeProperties, controller, nSystem, difficultyUpdater, taskRunner)
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
-            obj.updateRate          = updateRate;
+            obj.taskTimeProperties  = taskTimeProperties;
             obj.controller          = controller;
             obj.unstableSystem      = nSystem;
             obj.difficultyUpdater   = difficultyUpdater;
             obj.taskRunner          = taskRunner;
+            obj.state               = CSTask.Created;
         end
 
         function init(obj)
             disp('Init CSTTask');
             obj.controller.initController();
             obj.unstableSystem.init();
+            obj.taskRunner.init();
+            obj.state = CSTask.Initialized;
         end
 
         function addRecorder(obj, recorder)
@@ -38,59 +50,118 @@ classdef CSTask < handle
         end
 
         function start(obj)
-            disp('Start Task')
+            if obj.state~= CSTask.Initialized 
+                error('Task should be initialized first');
+            end
+            expectedElapsedTime = 1 / obj.taskTimeProperties.updateRate;
             tic;
             while ~obj.isDone()
                 elapsedTimeInSeconds  = toc;
-                if elapsedTimeInSeconds > 1/obj.updateRate
-                    disp('Update Task');
-                    obj.update(elapsedTimeInSeconds);
+                if elapsedTimeInSeconds > expectedElapsedTime
                     tic;
+                    obj.update(elapsedTimeInSeconds);
+                    obj.currentTime = obj.currentTime + elapsedTimeInSeconds;
+                    obj.throwWarningIfSlowDown(elapsedTimeInSeconds, expectedElapsedTime);
                 end
             end
         end
 
         function update(obj, dt)
-            disp('Update CSTTask');
-            if ~obj.isDone()
-                obj.updateTask(dt);
+            switch obj.state
+                case CSTask.Baseline
+                    obj.updateBaseline(dt);
+                case CSTask.RunTrial
+                    obj.updateTrial(dt);
+                case CSTask.Break
+                    obj.updateBreak(dt);
+                case CSTask.SwitchTrial 
+                    obj.updateSwitchTrial(dt);
+                case CSTask.SwitchRun
+                    obj.updateSwitchRun(dt);
+                otherwise
+                    obj.state = CSTask.Baseline;
             end
         end
 
-        function updateTask(obj, dt)
-            if ~obj.unstableSystem.exploded() && obj.currentTime < obj.maxTimePerTrial
-                obj.runTrial(dt);
+        function throwWarningIfSlowDown(obj, elapsedTimeInSeconds, expectedElapsedTime)
+            if((elapsedTimeInSeconds - expectedElapsedTime)/(expectedElapsedTime) > ...
+                obj.taskTimeProperties.precision)
+                warning(['Program is running slower than expected: ' ...
+                    num2str(round(1/elapsedTimeInSeconds)) 'Hz instead of ' ...
+                    num2str(round(obj.taskTimeProperties.updateRate)) 'Hz'])
+            end
+        end
+
+
+        function updateBaseline(obj, dt)
+            if obj.currentTime < obj.taskTimeProperties.baselineDuration
+                obj.updateRecorders();
+            else
+                obj.purge();
+                obj.state = CSTask.RunTrial;
+                obj.taskRunner.startTrial(dt);
+                obj.currentTime     = 0;
+            end
+        end
+
+        function updateTrial(obj, dt)
+            if ~obj.unstableSystem.exploded() && obj.currentTime < obj.taskTimeProperties.trialDuration
+                if(obj.controller.update(dt))
+                    obj.unstableSystem.setInput(obj.controller.input, obj.controller.minInput, obj.controller.maxInput);
+                end
+                obj.unstableSystem.update(dt);
+                obj.updateRecorders();
+                obj.computeITR();
+                % disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.trialDuration)])
+                % disp(['Current ITR : ' num2str(obj.controllerITR)])
             else
                 outcome = obj.getOutcome();
-                obj.taskRunner.update(outcome);
-                obj.switchTrial(dt);
+                obj.taskRunner.endTrial(outcome);
                 % We need to send the opposite command because it is the opposite of a detection task
                 obj.difficultyUpdater.update(obj.unstableSystem.lambda, ~outcome);
                 obj.unstableSystem.lambda = obj.difficultyUpdater.getNewDifficulty();
+                obj.save();
+                obj.currentTime     = 0;
+                obj.state           = CSTask.Break;
+                obj.taskRunner.startBreak(dt);
+            end
+        end
+
+        function updateBreak(obj, dt)
+            if obj.currentTime > obj.taskTimeProperties.breakDuration
+                obj.taskRunner.switchTrial(dt);
+                obj.state = CSTask.SwitchTrial;
+                obj.currentTime     = 0;
+            end
+        end
+
+        function updateSwitchTrial(obj, dt)
+            if obj.currentTime > obj.taskTimeProperties.switchTrialDuration
                 if obj.taskRunner.shouldSwitchRun()
-                    obj.switchRun(dt);
+                    obj.taskRunner.switchRun();
+                    obj.state = CSTask.SwitchRun;
+                else
+                    obj.taskRunner.startBaseline();
+                    obj.state = CSTask.Baseline;
                 end
+                obj.currentTime     = 0;
+            end
+        end
+
+        function updateSwitchRun(obj, dt)
+            if obj.currentTime > obj.taskTimeProperties.switchRunDuration
+                obj.taskRunner.startBaseline(dt);
+                obj.state = CSTask.Baseline;
+                obj.currentTime     = 0;
             end
         end
 
         function outcome = getOutcome(obj)
-            if obj.currentTime >= obj.maxTimePerTrial
+            if obj.currentTime >= obj.taskTimeProperties.trialDuration
                 outcome = 1;
             else
                 outcome = 0;
             end
-        end
-
-        function runTrial(obj, dt)
-            if(obj.controller.update(dt))
-                obj.unstableSystem.setInput(obj.controller.input, obj.controller.minInput, obj.controller.maxInput);
-            end
-            obj.unstableSystem.update(dt);
-            obj.updateRecorders();
-            obj.computeITR();
-            obj.currentTime = obj.currentTime + dt;
-            % disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.maxTimePerTrial)])
-            % disp(['Current ITR : ' num2str(obj.controllerITR)])
         end
 
         function computeITR(obj)
@@ -106,26 +177,19 @@ classdef CSTask < handle
             end
         end
 
-        function switchTrial(obj, dt)
-            obj.save();
-            obj.purge();
-            obj.taskRunner.switchTrial();
-            obj.currentTime     = 0;
-        end
-
-        function switchRun(obj, dt)
-            obj.taskRunner.switchRun();
-        end
-
         function purge(obj)
             obj.controller.purge();
             obj.unstableSystem.reset();
-            obj.controllerITR = 0;
+            for recorderIndex = 1:length(obj.recorders)
+                obj.recorders(recorderIndex).purge();
+            end 
+            obj.controllerITR   = 0;
+            obj.ITRMemory       = [];
         end
 
         function save(obj)
-            trial = struct('Controller', struct(obj.controller), ...
-                'System', struct(obj.unstableSystem), ...
+            trial = struct('Controller', obj.controller, ...
+                'System', obj.unstableSystem, ...
                 'TaskRunner', obj.taskRunner, ...
                 'ITR', obj.ITRMemory);
             for recorderIndex = 1:length(obj.recorders)
@@ -133,7 +197,7 @@ classdef CSTask < handle
                 disp('Add EEG data to trial')
                 recorderName = (class(obj.recorders(recorderIndex)));
                 recorderName(recorderName == '.') = '';
-                trial.(recorderName) = struct(obj.recorders(recorderIndex));
+                trial.(recorderName) = obj.recorders(recorderIndex).data;
             end
             save(['Run_' num2str(obj.taskRunner.currentRun) '_Trial_' ...
                 num2str(obj.taskRunner.currentTrial)], 'trial');

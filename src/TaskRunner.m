@@ -16,9 +16,18 @@ classdef TaskRunner < handle
 
 		end
 
-		function update(obj, outcome)
+		function endTrial(obj, outcome)
 			obj.results = [obj.results outcome];
 		end
+
+        function startBaseline(obj, dt)
+        end
+
+        function startTrial(obj, dt)
+        end
+
+        function startBreak(obj, dt)
+        end
 
 		function switchTrial(obj, dt)
             obj.currentTrial    = obj.currentTrial + 1;

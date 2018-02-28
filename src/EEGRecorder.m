@@ -10,7 +10,7 @@ classdef EEGRecorder < ExternalRecorder & handle
 			obj@ExternalRecorder();
 			obj.loop = loop;
 			obj.config = config;
-			obj.data = struct('eeg', [], 'trigger', [], 'time', []);
+			obj.data = struct('eeg', [], 'trigger', [], 'timestamp', []);
 		end
 
 		function init(obj)
@@ -33,15 +33,13 @@ classdef EEGRecorder < ExternalRecorder & handle
 			obj.jump.tic = ndf_tic();
 			[obj.ndf.frame, obj.ndf.size] = ndf_read(obj.ndf.sink, obj.ndf.conf, obj.ndf.frame);
 			ndf_toc(obj.ndf.frame.timestamp);
-
 			obj.data.eeg 		= [obj.data.eeg; obj.ndf.frame.eeg];
 			obj.data.trigger 	= [obj.data.trigger; obj.ndf.frame.tri];
-			obj.data.time 		= [obj.data.time; obj.ndf.frame.timestamp];
+			obj.data.timestamp 	= [obj.data.timestamp; obj.ndf.frame.timestamp];
 		end
 
 		function purge(obj)
-			obj.initBuffer();
-			obj.data = struct('eeg', [], 'trigger', [], 'time', []);
+			obj.data = struct('eeg', [], 'trigger', [], 'timestamp', []);
 		end
 
 		function createNDF(obj)

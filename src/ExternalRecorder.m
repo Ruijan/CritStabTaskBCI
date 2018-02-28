@@ -1,7 +1,7 @@
 classdef ExternalRecorder < handle
 	properties
 		data = [],
-		timestamp = []
+		recorderProperties
 	end
 	methods(Abstract)
 		update(obj)

@@ -12,8 +12,8 @@ classdef ConnectedTaskRunner < handle & TaskRunner
 			obj.tobiIdSender = tobiIdSender;
 		end
 
-        function update(obj, outcome)
-            update@TaskRunner(obj, outcome);
+        function endTrial(obj, outcome)
+            endTrial@TaskRunner(obj, outcome);
             obj.checkIfConnected();
             if outcome == 1
                 % Send Hit/Success event in case of stable system
@@ -33,16 +33,16 @@ classdef ConnectedTaskRunner < handle & TaskRunner
             obj.tobiIdSender.sendEvent(1);
         end
 
-		function switchTrial(obj, dt)
+        function startBaseline(obj, dt)
             obj.checkIfConnected();
-            obj.currentTrial    = obj.currentTrial + 1;
-            % Send Start event at the beginning of the trial
-            obj.tobiIdSender.sendEvent(781);
+            % Send Cross event at the beginning of the baseline
+            obj.tobiIdSender.sendEvent(786);
         end
 
-        function switchRun(obj, dt)
-            obj.currentRun      = obj.currentRun + 1;
-            obj.currentTrial    = 1;
+        function startTrial(obj, dt)
+            obj.checkIfConnected();
+            % Send Start event at the beginning of the trial
+            obj.tobiIdSender.sendEvent(781);
         end
 
         function shouldSwitch = shouldSwitchRun(obj)

@@ -4,16 +4,14 @@ classdef GraphicalCSTask < handle & CSTask
     
     properties
         engine
-        trialBreakTime  = 5.0 %s
-        fixationTime    = 3.0 %s
-        runBreakTime    = 300 %s
+
     end
     
     methods
-        function obj = GraphicalCSTask(controller, engine, nSystem, difficultyUpdater, taskRunner, updateRate)
+        function obj = GraphicalCSTask(taskTimeProperties, controller, engine, nSystem, difficultyUpdater, taskRunner)
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
-            obj@CSTask(controller, nSystem, difficultyUpdater, taskRunner, updateRate);
+            obj@CSTask(taskTimeProperties, controller, nSystem, difficultyUpdater, taskRunner);
             obj.engine = engine;            
         end
 
@@ -23,46 +21,31 @@ classdef GraphicalCSTask < handle & CSTask
             obj.engine.openWindow(screenResolution - [1 1 1 1]);
             init@CSTask(obj);
         end
-        function start(obj)
-            obj.pauseTask(2.0);
-            obj.purge();
-            obj.startFixationPeriod();
-            start@CSTask(obj);
 
+        function update(obj, dt)
+            update@CSTask(obj, dt);
+            obj.engine.updateScreen();
         end
 
-        function updateTask(obj, dt)
-            updateTask@CSTask(obj, dt);
-            obj.engine.updateScreen();
+        function updateTrial(obj, dt)
+            updateTrial@CSTask(obj, dt);
             if obj.engine.checkIfKeyPressed('S')
                 obj.unstableSystem.showInput = ~obj.unstableSystem.showInput;
                 return
             end
         end
 
-        function switchTrial(obj, dt)
-            obj.pauseTask(obj.trialBreakTime);
-            switchTrial@CSTask(obj, dt);
-            obj.startFixationPeriod();
-        end
-
-        function switchRun(obj, dt)
-            obj.pauseTask(obj.runBreakTime);
-            switchRun@CSTask(obj, dt);
-        end
-
-        function pauseTask(obj, breakTime)
-            tic;
-            currentTime = toc;
-            outcome = 'Failure';
-            if isempty(obj.taskRunner.results)
-                outcome = 'Unknown';
-            elseif obj.taskRunner.results(end) == 1
-                outcome = 'Success';
-            end
-            while currentTime < breakTime
-                obj.engine.drawText(['Break ' num2str(round(currentTime,1)) '/'...
-                        num2str(breakTime) '\n Trial ' num2str(obj.taskRunner.currentTrial) '/'...
+        function updateBreak(obj, dt)
+            updateBreak@CSTask(obj, dt);
+            if obj.currentTime < obj.taskTimeProperties.breakDuration
+                outcome = 'Failure';
+                if isempty(obj.taskRunner.results)
+                    outcome = 'Unknown';
+                elseif obj.taskRunner.results(end) == 1
+                    outcome = 'Success';
+                end
+                obj.engine.drawText(['Break ' num2str(round(obj.currentTime,1)) '/'...
+                        num2str(obj.taskTimeProperties.breakDuration) '\n Trial ' num2str(obj.taskRunner.currentTrial) '/'...
                         num2str(obj.taskRunner.trialsPerRun) '\n Difficulty ' num2str(obj.unstableSystem.lambda) ...
                         '\n Outcome : ' outcome], ...
                         obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
@@ -70,20 +53,14 @@ classdef GraphicalCSTask < handle & CSTask
                     obj.userDone = true;
                     return
                 end
-                obj.engine.updateScreen();
-                currentTime = toc;
             end
         end
 
-        function startFixationPeriod(obj)
-            tic;
-            currentTime = toc;
-            while currentTime < obj.fixationTime
+        function updateBaseline(obj, dt)
+            updateBaseline@CSTask(obj, dt);
+            if obj.currentTime < obj.taskTimeProperties.baselineDuration
                 obj.engine.drawText('+', ...
                         obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
-                obj.engine.updateScreen();
-                obj.updateRecorders();
-                currentTime = toc;
             end
         end
 

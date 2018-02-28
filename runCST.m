@@ -42,7 +42,6 @@ function runCST(varargin)
 		eegRecorder.init();
 		task.addRecorder(eegRecorder);
 	end
-	task.maxTimePerTrial 	= 9;
 	task.init();
 	task.start();
 	task.destroy();

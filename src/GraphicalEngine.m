@@ -4,6 +4,7 @@ classdef GraphicalEngine < handle
 		window 		= 0,
 		windowSize 	= 0,
 		setup 		= 2
+		previousKeyPressed = 0;
 	end
 	methods
 		function obj = GraphicalEngine(setup)
@@ -62,7 +63,12 @@ classdef GraphicalEngine < handle
 			[a,b,keyCode] = KbCheck;
 			keyPressed = false;
 			if any(keyCode(keyboardKey))
-				keyPressed = true;
+				if obj.previousKeyPressed ~= keyboardKey
+					keyPressed = true;
+					obj.previousKeyPressed = keyboardKey;
+				end
+			else
+				obj.previousKeyPressed = 0;
 			end
 		end
 	end
