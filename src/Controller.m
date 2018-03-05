@@ -18,5 +18,6 @@ classdef Controller < handle
     methods(Abstract)
     	initController(obj)
     	updated = update(obj, dt)
+        destroy(obj);
 	end
 end

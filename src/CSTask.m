@@ -92,7 +92,7 @@ classdef CSTask < handle
                 obj.taskTimeProperties.precision)
                 warning(['Program is running slower than expected: ' ...
                     num2str(round(1/elapsedTimeInSeconds)) 'Hz instead of ' ...
-                    num2str(round(obj.taskTimeProperties.updateRate)) 'Hz'])
+                    num2str(round(obj.taskTimeProperties.updateRate)) 'Hz in state : ' num2str(obj.state)])
             end
         end
 
@@ -113,7 +113,9 @@ classdef CSTask < handle
                 if(obj.controller.update(dt))
                     obj.unstableSystem.setInput(obj.controller.input, obj.controller.minInput, obj.controller.maxInput);
                 end
-                obj.unstableSystem.update(dt);
+                if obj.currentTime > obj.taskTimeProperties.startBreakDuration
+                    obj.unstableSystem.update(dt);
+                end
                 obj.updateRecorders();
                 obj.computeITR();
                 for feedbackIndex = 1:length(obj.feedbacks)
@@ -221,7 +223,8 @@ classdef CSTask < handle
         end
 
         function destroy(obj)
-
+            obj.controller.destroy();
+            obj.taskRunner.destroy();
         end
     end
 end

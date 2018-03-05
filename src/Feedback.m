@@ -10,5 +10,6 @@ classdef Feedback < handle
 	methods(Abstract)
 		init(obj)
 		update(obj)
+		destroy(obj)
 	end 
 end

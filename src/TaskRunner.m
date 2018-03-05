@@ -45,6 +45,10 @@ classdef TaskRunner < handle
         function done = isDone(obj)
         	done = obj.currentRun > obj.runs;
         end
+
+        function destroy(obj)
+
+        end
 	end
 
 

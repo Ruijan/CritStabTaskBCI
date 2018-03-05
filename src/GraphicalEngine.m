@@ -63,6 +63,14 @@ classdef GraphicalEngine < handle
 			center = obj.windowSize(3:4) ./ 2;
 		end
 
+		function hideCursor(obj)
+			HideCursor();
+		end
+
+		function showCursor(obj)
+			ShowCursor();
+		end
+
 		function keyPressed = checkIfKeyPressed(obj, key)
 			keyboardKey = KbName(key);
 			[a,b,keyCode] = KbCheck;

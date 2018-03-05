@@ -53,6 +53,12 @@ classdef BCIController < handle & Controller
                 end
             end 
         end
+
+        function destroy(obj)
+            obj.tobiICGet.detach();
+            obj.tobiICGet.delete();
+            obj.loop.disconnect();
+        end
     end
 end
 

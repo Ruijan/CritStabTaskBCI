@@ -17,12 +17,17 @@ classdef TrainingController < handle & Controller
 		function updated = update(obj, dt)
 			updated = false;
 			obj.unstableSystem.state = sin(obj.currentTime) * obj.unstableSystem.boundary/2;
+			obj.unstableSystem.input = -sin(obj.currentTime) * obj.unstableSystem.boundary/2;
 			obj.currentTime = obj.currentTime + dt;
 		end
 
 		function purge(obj)
 			purge@Controller(obj);
 			obj.currentTime = 0;
+		end
+
+		function destroy(obj)
+
 		end
 	end 
 end

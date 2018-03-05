@@ -1,16 +1,13 @@
 classdef TaskRunnerFactory < handle
 
 	methods(Static)
-		function taskRunner = createTaskRunner(runnerMode, runs, trialsPerRun)
+		function taskRunner = createTaskRunner(runnerMode, runs, trialsPerRun, loop, tobiIDSet)
 			if ~TaskRunnerFactory.isValidTaskRunner(runnerMode)
-				error('Invalid task runner mode. Expected Simple or BCI');
+				error('Invalid task runner mode. Expected Simple or Connected');
 			end
 			if strcmp(runnerMode,'Simple')
 				taskRunner = TaskRunner(runs, trialsPerRun);
-			elseif strcmp(runnerMode,'BCI')
-				Loop.addPaths();
-				loop = Loop();
-				tobiIDSet = TobiIDSet(loop);
+			elseif strcmp(runnerMode,'Connected')
 				taskRunner = ConnectedTaskRunner(loop, tobiIDSet, runs, trialsPerRun);
 			end
 				
@@ -19,7 +16,7 @@ classdef TaskRunnerFactory < handle
 		function valid = isValidTaskRunner(runnerModer)
 			valid = true;
 			if ~ischar(runnerModer) || (~strcmp(runnerModer,'Simple') && ...
-				~strcmp(runnerModer,'BCI'))
+				~strcmp(runnerModer,'Connected'))
 				valid = false;
 			end
 		end

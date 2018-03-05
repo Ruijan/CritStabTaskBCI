@@ -8,13 +8,14 @@ classdef CSTaskFactory < handle
 			addRequired(p,'system');
 			addRequired(p,'difficultyUpdater');
 			addRequired(p,'taskRunner');
+			addRequired(p,'taskTimeProperties');
 			addOptional(p,'engine', defaultEngine);
+			
 			parse(p,varargin{:});
 			if strcmp(p.Results.mode, 'Graphic')
 				disp('Create visual task');
-				timeProperties = TaskTimeProperties(9, 5, 3, 0, 0, 60);
 				task = GraphicalCSTask(...
-					timeProperties,...
+					p.Results.taskTimeProperties,...
 					p.Results.controller,...
 					p.Results.engine,...
 					p.Results.system, ...
@@ -22,15 +23,56 @@ classdef CSTaskFactory < handle
 					p.Results.taskRunner);
 			elseif strcmp(p.Results.mode, 'None')
 				disp('Create hidden task');
-				timeProperties = TaskTimeProperties(9, 0, 0, 0, 0, 1000);
 				task = CSTask(...
-					timeProperties,...
+					p.Results.taskTimeProperties,...
 					p.Results.controller,...
 					p.Results.system, ...
 					p.Results.difficultyUpdater, ...
 					p.Results.taskRunner);
 			end
 
+		end
+
+		function task = createCSTaskFromParameters(params)
+			if (strcmp(params.controller, 'Mouse') || strcmp(params.controller, 'BCI') || ...
+				strcmp(params.controller, 'Training')) && ~strcmp(params.display, 'Graphic')
+				params.display = 'Graphic';
+			end
+			engine 				= [];
+			if strcmp(params.display, 'Graphic')
+				engine = GraphicalEngine(2);
+			end
+			loop = [];
+			tobiIDSet = [];
+			tobiICGet = [];
+			if strcmp(params.taskRunner, 'Connected')
+				Loop.addPaths();
+				loop = Loop();
+				tobiIDSet = TobiIDSet(loop);
+			end
+			if strcmp(params.controller, 'BCI')
+				tobiICGet = TobiICGet(loop);
+			end
+
+			newSystem 	= SystemFactory.createSystem(params.display, engine);
+			controller 	= ControllerFactory.createController(...
+				params.controller, engine, newSystem, loop, tobiICGet);
+			taskRunner 	= TaskRunnerFactory.createTaskRunner(params.taskRunner, ...
+				params.runs, params.trialsPerRun, loop, tobiIDSet);
+			difficultyUpdater = [];
+			timeProperties = [];
+			if strcmp(params.controller, 'BCI')
+				difficultyUpdater 	= QuestDifficultyUpdater(0.5, 1.5, 0.75, 0.75, 3.5, 0.99, 0.01);
+				timeProperties 		= TaskTimeProperties(9, 1.5, 5, 3, 0, 0, 60);
+			elseif strcmp(params.controller, 'Mouse')
+				difficultyUpdater 	= QuestDifficultyUpdater(3.0, 5, 1.5, 0.75, 3.5, 0.99, 0.01);
+				timeProperties 		= TaskTimeProperties(9, 0, 5, 0, 0, 0, 60);
+			elseif strcmp(params.controller, 'Training')
+				difficultyUpdater 	= VectorDifficultyUpdater([1.5], [1]);
+				timeProperties 		= TaskTimeProperties(15, 1, 5, 3, 0, 0, 60);
+			end
+			task = CSTaskFactory.createCSTask(params.display, controller, newSystem, ...
+				difficultyUpdater, taskRunner, timeProperties, engine);
 		end
 
 		function valid = isValidCSTask(taskMode)

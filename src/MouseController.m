@@ -37,6 +37,10 @@ classdef MouseController < handle & Controller
             center = obj.engine.getCenter();
             obj.engine.setMousePosition(center(1), center(2));
         end
+
+        function destroy(obj)
+
+        end
     end
 end
 

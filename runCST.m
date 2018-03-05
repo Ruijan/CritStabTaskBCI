@@ -1,10 +1,12 @@
 function runCST(varargin)
 	addpath(genpath('src/'))
-	defaultControllerMode 	= 'BCI';
+	defaultControllerMode 	= 'Mouse';
 	defaultDisplayMode 		= 'Graphic';
-	defaultRecorder 		= 'EEG';
+	defaultRecorder 		= 'None';
+	defaultTaskRunner 		= 'Simple';
 	defaultRuns				= 4;
 	defaultTrialsPerRun 	= 15;
+
 	
 	p = inputParser;
 	addOptional(p,'controller', defaultControllerMode, @ControllerFactory.isValidController);
@@ -12,30 +14,10 @@ function runCST(varargin)
 	addOptional(p,'runs', defaultRuns, @isValidScalarPosNum);
 	addOptional(p,'trialsPerRun', defaultTrialsPerRun, @isValidScalarPosNum);
 	addOptional(p,'recorder', defaultRecorder, @isValidRecorder);
+	addOptional(p,'taskRunner', defaultTaskRunner, @TaskRunnerFactory.isValidTaskRunner);
 	parse(p,varargin{:});
-	if strcmp(p.Results.controller, 'Mouse') && ~strcmp(p.Results.display, 'Graphic') || ...
-		strcmp(p.Results.controller, 'BCI') && ~strcmp(p.Results.display, 'Graphic')
-		p.Results.display = 'Graphic';
-	end
-	taskRunnerMode = 'Simple';
-	if strcmp(p.Results.controller, 'BCI')
-		taskRunnerMode = 'BCI';
-	end
-	engine 				= [];
-	if strcmp(p.Results.display, 'Graphic')
-		engine = GraphicalEngine(2);
-	end
-	newSystem 			= SystemFactory.createSystem(p.Results.display, engine);
-	controller 			= ControllerFactory.createController(p.Results.controller, engine, newSystem);
-	taskRunner 			= TaskRunnerFactory.createTaskRunner(taskRunnerMode, p.Results.runs, p.Results.trialsPerRun);
-	difficultyUpdater 	= QuestDifficultyUpdater(1.5, 5, 1.5, 0.75, 3.5, 0.99, 0.01);
-	task 				= CSTaskFactory.createCSTask(...
-		p.Results.display, ...
-		controller, ...
-		newSystem, ...
-		difficultyUpdater, ...
-		taskRunner, ...
-		engine);
+	
+	task = CSTaskFactory.createCSTaskFromParameters(p.Results);
 	if strcmp(p.Results.recorder, 'EEG')
 		eegRecorder 		= EEGRecorder(Loop(), LoopConfiguration());
 		eegRecorder.init();

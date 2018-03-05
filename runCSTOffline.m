@@ -1,3 +1,3 @@
 addpath .
-runCST('Training', 'Graphic', 1, 20, 'EEG');
+runCST('Training', 'Graphic', 1, 20, 'None', 'Connected');
 exit

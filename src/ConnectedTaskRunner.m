@@ -73,5 +73,11 @@ classdef ConnectedTaskRunner < handle & TaskRunner
                 error('ConnectedTaskRunner:Connection', 'Cannot connect to CNBI Loop.')
             end 
         end
+
+        function destroy(obj)
+            obj.tobiIdSender.detach();
+            obj.tobiIdSender.delete();
+            obj.loop.disconnect();
+        end
 	end
 end

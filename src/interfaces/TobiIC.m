@@ -24,8 +24,10 @@ classdef TobiIC < handle
             [attached] = tic_detach(obj.tobiIC);
         end
         function tIC = delete(obj)
-            [obj.tobiIC] = tic_delete(obj.tobiIC);
-            tIC = obj.tobiIC;
+            [obj.tobiIC]    = tic_delete(obj.tobiIC);
+            tIC             = obj.tobiIC;
+            obj.serializer  = icserializerrapid_delete(obj.serializer);
+            obj.iCMessage   = icmessage_delete(iCMessage);
         end
     end
 end

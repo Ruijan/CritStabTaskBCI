@@ -3,8 +3,10 @@ classdef ControllerFactory < handle
 		function controller = createController(varargin)
 			p = inputParser;
 			addRequired(p,'mode', @ControllerFactory.isValidController);
-			addOptional(p,'engine', @ControllerFactory.isValidEngine);
-			addOptional(p,'system', @ControllerFactory.isValidSystem);
+			addRequired(p,'engine', @ControllerFactory.isValidEngine);
+			addRequired(p,'system', @ControllerFactory.isValidSystem);
+			addRequired(p,'loop', @ControllerFactory.isValidLoop);
+			addRequired(p,'tobiICGet', @ControllerFactory.isValidTobiICGet);
 			parse(p,varargin{:});
 
 			if strcmp(p.Results.mode, 'Mouse')
@@ -12,10 +14,7 @@ classdef ControllerFactory < handle
 				controller = MouseController(p.Results.engine);
 			elseif strcmp(p.Results.mode, 'BCI')
 				disp('Create BCI Controller');
-				Loop.addPaths();
-				loop = Loop();
-				tobiICGet = TobiICGet(loop);
-				controller = BCIController(loop, tobiICGet);
+				controller = BCIController(p.Results.loop, p.Results.tobiICGet);
 			elseif strcmp(p.Results.mode, 'Training')
 				disp('Create training Controller');
 				controller = TrainingController(p.Results.system);
@@ -43,7 +42,22 @@ classdef ControllerFactory < handle
 
 		function valid = isValidSystem(unstableSystem)
 			valid = true;
-			if ~strcmp(class(unstableSystem),'System')
+			if ~strcmp(class(unstableSystem),'System') && ~strcmp(class(unstableSystem),'GraphicalSystem')
+				valid = false;
+			end
+		end
+
+		function valid = isValidLoop(loop)
+			valid = true;
+			if ~strcmp(class(loop),'Loop') && ~isempty(loop)
+				valid = false;
+			end
+		end
+
+		function valid = isValidTobiICGet(tobiICGet)
+			valid = true;
+			class(tobiICGet)
+			if ~strcmp(class(tobiICGet),'TobiICGet') && ~isempty(tobiICGet)
 				valid = false;
 			end
 		end
