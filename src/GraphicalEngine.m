@@ -27,6 +27,11 @@ classdef GraphicalEngine < handle
                         rectSize ./ 2]);
 		end
 
+		function drawFilledCircle(obj, objColor, position, radius)
+			Screen('FillOval',obj.window, uint8(objColor),[position - radius, position + ...
+                        radius]);
+		end
+
 		function drawText(obj, textToDisplay, postion, objColor)
 			DrawFormattedText(obj.window,textToDisplay,'center','center', objColor);
 			% Screen('DrawText', obj.window, textToDisplay, postion(1), postion(2), objColor);

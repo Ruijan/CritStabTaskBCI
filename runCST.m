@@ -1,6 +1,5 @@
 function runCST(varargin)
-	addpath('src/')
-	addpath('src/interfaces')
+	addpath(genpath('src/'))
 	defaultControllerMode 	= 'BCI';
 	defaultDisplayMode 		= 'Graphic';
 	defaultRecorder 		= 'EEG';

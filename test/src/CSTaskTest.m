@@ -3,9 +3,7 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
     properties
         task,
         controllerMock,
-        runs = 4,
-        trialsPerRun = 15,
-        updateRate = 50,
+        propertiesMock,
         systemMock,
         recorderMock,
         taskRunnerMock,
@@ -15,17 +13,17 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
     methods(TestMethodSetup)
         function createTask(testCase)
             import matlab.mock.constraints.WasCalled;
-            import matlab.unittest.constraints.IsAnything;
             testCase.controllerMock = ControllerMock(testCase);
             testCase.systemMock = SystemMock(testCase);
             testCase.recorderMock = ExternalRecorderMock(testCase);
             testCase.taskRunnerMock = TaskRunnerMock(testCase);
             testCase.difficultyUpdaterMock = DifficultyUpdaterMock(testCase);
-            testCase.task =  CSTask(testCase.controllerMock.stub, ...
+            testCase.propertiesMock = TaskTimePropertiesMock(testCase);
+            testCase.task =  CSTask(testCase.propertiesMock.stub, ...
+                testCase.controllerMock.stub, ...
                 testCase.systemMock.stub, ...
                 testCase.difficultyUpdaterMock.stub, ...
-                testCase.taskRunnerMock.stub, ...
-                testCase.updateRate);
+                testCase.taskRunnerMock.stub);
 
         end
     end
@@ -42,14 +40,13 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
         function testCSTaskCreation(testCase)
             testCase.verifyEqual(testCase.task.controllerITR, 0);
             testCase.verifyEqual(testCase.task.ITRMemory, []);
-            testCase.verifyEqual(testCase.task.maxTimePerTrial, 10);
             testCase.verifyEqual(testCase.task.currentTime, 0);
             testCase.verifyEqual(testCase.task.userDone, false);
             testCase.verifyEqual(testCase.task.unstableSystem, testCase.systemMock.stub);
             testCase.verifyEqual(testCase.task.controller, testCase.controllerMock.stub);
             testCase.verifyEqual(testCase.task.taskRunner, testCase.taskRunnerMock.stub);
             testCase.verifyEqual(testCase.task.difficultyUpdater, testCase.difficultyUpdaterMock.stub);
-            testCase.verifyEqual(testCase.task.updateRate, testCase.updateRate);
+            testCase.verifyEqual(testCase.task.taskTimeProperties, testCase.propertiesMock.stub);
         end
 
         function testCSTaskInitialization(testCase)
@@ -67,13 +64,16 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
 
         function testCSTaskUpdate(testCase)
             import matlab.mock.constraints.WasCalled;
+            import matlab.unittest.constraints.IsAnything;
             testCase.initTask();
             dt = 0.01;
             testCase.task.addRecorder(testCase.recorderMock.stub);
             testCase.task.addRecorder(testCase.recorderMock.stub);
+            testCase.task.state = CSTask.RunTrial;
             testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), false);
             testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.isDone), false);
-            testCase.assignOutputsWhen(withExactInputs(testCase.controllerMock.behavior.update), true);
+            testCase.assignOutputsWhen(testCase.controllerMock.behavior.update(IsAnything), true);
+            testCase.assignOutputsWhen(get(testCase.propertiesMock.behavior.trialDuration), 10.0);
             testCase.assignOutputsWhen(get(testCase.controllerMock.behavior.input), 0.7);
             testCase.assignOutputsWhen(get(testCase.controllerMock.behavior.minInput), 100);
             testCase.assignOutputsWhen(get(testCase.controllerMock.behavior.maxInput), 200);
@@ -88,13 +88,14 @@ classdef CSTaskTest < matlab.mock.TestCase & handle
             testCase.initTask();
             testCase.task.addRecorder(testCase.recorderMock.stub);
             testCase.task.addRecorder(testCase.recorderMock.stub);
+            testCase.task.state = CSTask.RunTrial;
             testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.isDone), false);
             testCase.assignOutputsWhen(withExactInputs(testCase.systemMock.behavior.exploded), true);
             testCase.assignOutputsWhen(withExactInputs(testCase.taskRunnerMock.behavior.shouldSwitchRun), true);
             testCase.task.update(0.01);
             testCase.verifyCalled(withExactInputs(testCase.systemMock.behavior.exploded()));
             testCase.verifyNotCalled(testCase.systemMock.behavior.update(0.01));
-            testCase.verifyCalled(testCase.taskRunnerMock.behavior.update(IsAnything));
+            testCase.verifyCalled(testCase.taskRunnerMock.behavior.endTrial(IsAnything));
             testCase.verifyCalled(testCase.difficultyUpdaterMock.behavior.update(IsAnything, IsAnything));
             testCase.verifyCalled(withExactInputs(testCase.difficultyUpdaterMock.behavior.getNewDifficulty()));
             testCase.verifyCalled(withExactInputs(testCase.taskRunnerMock.behavior.shouldSwitchRun()));

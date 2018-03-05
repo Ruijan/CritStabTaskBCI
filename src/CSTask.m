@@ -9,11 +9,12 @@ classdef CSTask < handle
         taskRunner,
         taskTimeProperties,
         state,
-        recorders           = [],
-        controllerITR       = 0, % bits/second
-        ITRMemory           = [],
-        currentTime         = 0, % second
-        userDone            = false   
+        feedbacks       = [],
+        recorders       = [],
+        controllerITR   = 0, % bits/second
+        ITRMemory       = [],
+        currentTime     = 0, % second
+        userDone        = false   
     end
     properties (Constant)
         Created         = 0, 
@@ -43,6 +44,9 @@ classdef CSTask < handle
             obj.unstableSystem.init();
             obj.taskRunner.init();
             obj.state = CSTask.Initialized;
+            for feedbackIndex = 1:length(obj.feedbacks)
+                obj.feedbacks(feedbackIndex).init();
+            end
         end
 
         function addRecorder(obj, recorder)
@@ -112,6 +116,9 @@ classdef CSTask < handle
                 obj.unstableSystem.update(dt);
                 obj.updateRecorders();
                 obj.computeITR();
+                for feedbackIndex = 1:length(obj.feedbacks)
+                    obj.feedbacks(feedbackIndex).update();
+                end
                 % disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.trialDuration)])
                 % disp(['Current ITR : ' num2str(obj.controllerITR)])
             else

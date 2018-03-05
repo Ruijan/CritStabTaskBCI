@@ -1,3 +1,3 @@
 addpath .
-runCST('BCI', 'Graphic', 4, 15, 'EEG');
-%exit
+runCST('BCI', 'Graphic', 1, 15, 'EEG');
+exit

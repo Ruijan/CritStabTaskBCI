@@ -4,7 +4,6 @@ classdef GraphicalCSTask < handle & CSTask
     
     properties
         engine
-
     end
     
     methods
@@ -12,6 +11,7 @@ classdef GraphicalCSTask < handle & CSTask
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
             obj@CSTask(taskTimeProperties, controller, nSystem, difficultyUpdater, taskRunner);
+            obj.feedbacks = VisualFeedback(engine, nSystem);
             obj.engine = engine;            
         end
 
@@ -29,10 +29,6 @@ classdef GraphicalCSTask < handle & CSTask
 
         function updateTrial(obj, dt)
             updateTrial@CSTask(obj, dt);
-            if obj.engine.checkIfKeyPressed('S')
-                obj.unstableSystem.showInput = ~obj.unstableSystem.showInput;
-                return
-            end
         end
 
         function updateBreak(obj, dt)

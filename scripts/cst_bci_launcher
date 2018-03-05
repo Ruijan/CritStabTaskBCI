@@ -23,7 +23,7 @@ if [ "$modality" == "training" ]; then
 else
 	xml="${HOME}/data/BCICourse/$subject/mi_cst_prot.xml"
 	gnome-terminal \
-	---tab -e "bash -c 'cl_runloop -d offline.gdf -r'"
+	---tab -e "bash -c 'cl_runloop -d offline.gdf -r -f 128'"
 	sleep 5
 	#---tab -e "bash -c 'cl_runloopscope -d gtec'" --title "Loop"
 	DEFAULT_MI_BLOCK="mi"
