@@ -39,8 +39,7 @@ def chooseSession(button):
 		session = app.getRadioButton("sessions")
 		sessionPath = dataPath + "/" + session
 		createPath(session)
-		xmlFile = sessionPath + "/mi_cst_prot.xml" 
-		print(xmlFile)
+		print(session)
 		app.stop()
 	elif button == "Back":
 		app.hideSubWindow("Existing Session")
