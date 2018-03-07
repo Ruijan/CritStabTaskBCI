@@ -16,11 +16,20 @@ user = getpass.getuser()
 path = "/home/" + user + "/data/BCICourse/" + subject + "/trials/" + session + "/"
 if not os.path.isdir(path):
     os.makedirs(path)
+runNumber = 0;
+for (dirpath, dirnames, filenames) in os.walk(path):
+    for filename in filenames:
+        if "Run_" in filename:
+            currentRunNumber = int(filename[4]);
+            if currentRunNumber > runNumber:
+                runNumber = currentRunNumber
 pathToCurrentData = "/home/" + user + "/dev/CritStabTaskBCI/"
 files = []
 for (dirpath, dirnames, filenames) in os.walk(pathToCurrentData):
     for filename in filenames:
-        if ".mat" in filename and ".smr.mat" not in filename:
+        if ".mat" in filename and ".smr.mat" not in filename and "Run__Trial_.mat" not in filename:
             files.append(filename)
+            print(filename)
 for filename in files:
-    shutil.move(pathToCurrentData + filename, path + filename)
+    newfilename = filename[0:4] + str(runNumber+1) + filename[5::]
+    shutil.move(pathToCurrentData + filename, path + newfilename)

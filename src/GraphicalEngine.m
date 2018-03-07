@@ -5,6 +5,7 @@ classdef GraphicalEngine < handle
 		windowSize 	= 0,
 		setup 		= 2
 		previousKeyPressed = 0;
+		enabledKeys = [];
 	end
 	methods
 		function obj = GraphicalEngine(setup)
@@ -51,8 +52,9 @@ classdef GraphicalEngine < handle
 			Screen('Flip', obj.window);
 		end
 
-		function [x, y] = getMousePosition(obj)
-			[x,y] = GetMouse();
+		function pos = getMousePosition(obj)
+			pos = get(0, 'PointerLocation');
+			% [x,y] = GetMouse();
 		end
 
 		function setMousePosition(obj, x, y)
@@ -72,17 +74,25 @@ classdef GraphicalEngine < handle
 		end
 
 		function keyPressed = checkIfKeyPressed(obj, key)
-			keyboardKey = KbName(key);
 			[a,b,keyCode] = KbCheck;
 			keyPressed = false;
-			if any(keyCode(keyboardKey))
-				if obj.previousKeyPressed ~= keyboardKey
+			if any(keyCode(key))
+				if obj.previousKeyPressed ~= key
 					keyPressed = true;
-					obj.previousKeyPressed = keyboardKey;
+					obj.previousKeyPressed = key;
 				end
 			else
 				obj.previousKeyPressed = 0;
 			end
+		end
+
+		function key = getKeyboardKey(obj, key)
+			key = KbName(key);
+		end
+
+		function addEnabledKeyInput(obj, key)
+			obj.enabledKeys = [obj.enabledKeys key];
+			RestrictKeysForKbCheck(obj.enabledKeys);
 		end
 	end
 end

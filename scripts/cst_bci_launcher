@@ -88,7 +88,7 @@ else
 		exit 1
 	fi
 
-	storedir="$storedir$subject"
+	storedir="$storedir$subject/$session"
 	echo "[$NAME] - Data saving: $storedir "
 
 	# Get GDF and log names
@@ -152,7 +152,7 @@ else
 		echo "[$NAME] - Terminate MATLAB process"
 		cl_rpc terminate $MATLABPID
 	fi
-
+	python3 moveFilesToSubjectPath.py --subject $subject --session $session
 	# Unload configuration from nameserver
 	cl_init -u -B $block
 	cl_rpc eraseconfig $block subject 

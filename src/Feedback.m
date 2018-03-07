@@ -1,4 +1,4 @@
-classdef Feedback < handle
+classdef Feedback < handle & matlab.mixin.Heterogeneous
 	properties
 		system
 	end 
@@ -11,5 +11,6 @@ classdef Feedback < handle
 		init(obj)
 		update(obj)
 		destroy(obj)
+		endTrial(obj)
 	end 
 end

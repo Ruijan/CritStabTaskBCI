@@ -18,9 +18,9 @@ classdef TobiICGet < handle & TobiIC
         end
 
         function value = getProbability(obj)
-            value = icmessage_getvalue(obj.iCMessage, 'mi', '783');
-            value2 = icmessage_getvalue(obj.iCMessage, 'mi', '782');
-            disp(['BCI probs rest/MI : ' num2str(value) '/' num2str(value2)])
+            value = icmessage_getvalue(obj.iCMessage, 'mi', '782');
+            value2 = icmessage_getvalue(obj.iCMessage, 'mi', '783');
+            % disp(['BCI probs rest/MI : ' num2str(value) '/' num2str(value2)])
         end
     end
 end

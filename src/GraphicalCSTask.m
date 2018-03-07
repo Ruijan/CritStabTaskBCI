@@ -4,6 +4,7 @@ classdef GraphicalCSTask < handle & CSTask
     
     properties
         engine
+        stopTaskKey = NaN
     end
     
     methods
@@ -11,7 +12,6 @@ classdef GraphicalCSTask < handle & CSTask
             %SYSTEM Construct an instance of this class
             %   Detailed explanation goes here
             obj@CSTask(taskTimeProperties, controller, nSystem, difficultyUpdater, taskRunner);
-            obj.feedbacks = VisualFeedback(engine, nSystem);
             obj.engine = engine;            
         end
 
@@ -19,6 +19,8 @@ classdef GraphicalCSTask < handle & CSTask
             set(0,'units','pixels');
             screenResolution = get(0,'screensize');
             obj.engine.openWindow(screenResolution - [1 1 1 1]);
+            obj.stopTaskKey = obj.engine.getKeyboardKey('ESCAPE');
+            obj.engine.addEnabledKeyInput(obj.stopTaskKey);
             init@CSTask(obj);
         end
 
@@ -44,8 +46,8 @@ classdef GraphicalCSTask < handle & CSTask
                         num2str(obj.taskTimeProperties.breakDuration) '\n Trial ' num2str(obj.taskRunner.currentTrial) '/'...
                         num2str(obj.taskRunner.trialsPerRun) '\n Difficulty ' num2str(obj.unstableSystem.lambda) ...
                         '\n Outcome : ' outcome], ...
-                        obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
-                if obj.engine.checkIfKeyPressed('ESCAPE')
+                        obj.engine.getCenter() + [-150, -100], [255 255 255]);
+                if obj.engine.checkIfKeyPressed(obj.stopTaskKey)
                     obj.userDone = true;
                     return
                 end
@@ -55,8 +57,7 @@ classdef GraphicalCSTask < handle & CSTask
         function updateBaseline(obj, dt)
             updateBaseline@CSTask(obj, dt);
             if obj.currentTime < obj.taskTimeProperties.baselineDuration
-                obj.engine.drawText('+', ...
-                        obj.engine.getCenter() + [-150, -100], obj.engine.getWhiteIndex());
+                obj.engine.drawText('+', obj.engine.getCenter() + [-150, -100], [255 255 255]);
             end
         end
 

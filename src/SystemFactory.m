@@ -8,12 +8,11 @@ classdef SystemFactory < handle
 			set(0,'units','pixels');
             screenResolution = get(0,'screensize');
 			if strcmp(p.Results.mode, 'Graphic')
-				disp('Create visual system');
-				
+				disp('Create Visual System');
 				newSystem = GraphicalSystem(1.5, screenResolution(3)*0.4, ...
 					screenResolution(3)*0.4, 2, p.Results.engine);
 			elseif strcmp(p.Results.mode, 'None')
-				disp('Create hidden system');
+				disp('Create Hidden System');
 				newSystem = System(1.5, screenResolution(3)*0.4, 2);
 
 			end

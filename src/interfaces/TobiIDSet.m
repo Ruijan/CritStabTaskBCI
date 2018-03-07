@@ -11,7 +11,8 @@ classdef TobiIDSet < handle & TobiID
 
         function [hasmessage] = sendEvent(obj, event)
             idmessage_setevent(obj.iDMessage, event);
-            idmessage_dumpmessage(obj.iDMessage);
+            tid_setmessage(obj.tobiID, obj.serializer, -1);
+            % idmessage_dumpmessage(obj.iDMessage);
         end
 
     end

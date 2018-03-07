@@ -26,8 +26,10 @@ classdef MouseController < handle & Controller
             obj.input = position(1);
             if obj.input > obj.maxInput
                 obj.input = sign(obj.input) * obj.maxInput;
+                obj.engine.setMousePosition(obj.input, position(2));
             elseif obj.input < obj.minInput
                 obj.input = sign(obj.input) * obj.minInput;
+                obj.engine.setMousePosition(obj.input, position(2));
             end
             obj.inputMemory = [obj.inputMemory obj.input];
             updated = true;

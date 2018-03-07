@@ -38,29 +38,30 @@ classdef CSTaskFactory < handle
 				strcmp(params.controller, 'Training')) && ~strcmp(params.display, 'Graphic')
 				params.display = 'Graphic';
 			end
-			engine 				= [];
+			engine 		= [];
+			loop 		= [];
+			tobiIDSet 	= [];
+			tobiICGet 	= [];
+			feedbacks 	= [];
 			if strcmp(params.display, 'Graphic')
-				engine = GraphicalEngine(2);
+				engine 	= GraphicalEngine(2);
 			end
-			loop = [];
-			tobiIDSet = [];
-			tobiICGet = [];
+			
+			newSystem 	= SystemFactory.createSystem(params.display, engine);
 			if strcmp(params.taskRunner, 'Connected')
 				Loop.addPaths();
-				loop = Loop();
-				tobiIDSet = TobiIDSet(loop);
+				loop 		= Loop();
+				tobiIDSet 	= TobiIDSet(loop);
 			end
 			if strcmp(params.controller, 'BCI')
-				tobiICGet = TobiICGet(loop);
-			end
-
-			newSystem 	= SystemFactory.createSystem(params.display, engine);
-			controller 	= ControllerFactory.createController(...
+				tobiICGet 	= TobiICGet(loop);
+			end			
+			controller 		= ControllerFactory.createController(...
 				params.controller, engine, newSystem, loop, tobiICGet);
-			taskRunner 	= TaskRunnerFactory.createTaskRunner(params.taskRunner, ...
+			taskRunner 		= TaskRunnerFactory.createTaskRunner(params.taskRunner, ...
 				params.runs, params.trialsPerRun, loop, tobiIDSet);
-			difficultyUpdater = [];
-			timeProperties = [];
+			difficultyUpdater 	= [];
+			timeProperties 		= [];
 			if strcmp(params.controller, 'BCI')
 				difficultyUpdater 	= QuestDifficultyUpdater(0.5, 1.5, 0.75, 0.75, 3.5, 0.99, 0.01);
 				timeProperties 		= TaskTimeProperties(9, 1.5, 5, 3, 0, 0, 60);
@@ -71,8 +72,20 @@ classdef CSTaskFactory < handle
 				difficultyUpdater 	= VectorDifficultyUpdater([1.5], [1]);
 				timeProperties 		= TaskTimeProperties(15, 1, 5, 3, 0, 0, 60);
 			end
+
 			task = CSTaskFactory.createCSTask(params.display, controller, newSystem, ...
 				difficultyUpdater, taskRunner, timeProperties, engine);
+			
+			for feedbackIndex = 1:length(params.feedbacks)
+				task.addFeedback(FeedbackFactory.createFeedback(...
+					params.feedbacks{feedbackIndex}, ...
+					newSystem, ...
+					engine, ...
+					loop, ...
+					tobiIDSet, ...
+					params.bins, ...
+					params.frequency));
+			end
 		end
 
 		function valid = isValidCSTask(taskMode)

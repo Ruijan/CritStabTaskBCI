@@ -53,6 +53,10 @@ classdef CSTask < handle
             obj.recorders = [obj.recorders recorder];
         end
 
+        function addFeedback(obj, feedback)
+            obj.feedbacks = [obj.feedbacks feedback];
+        end
+
         function start(obj)
             if obj.state~= CSTask.Initialized 
                 error('Task should be initialized first');
@@ -124,6 +128,9 @@ classdef CSTask < handle
                 % disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.trialDuration)])
                 % disp(['Current ITR : ' num2str(obj.controllerITR)])
             else
+                for feedbackIndex = 1:length(obj.feedbacks)
+                    obj.feedbacks(feedbackIndex).endTrial();
+                end
                 outcome = obj.getOutcome();
                 obj.taskRunner.endTrial(outcome);
                 % We need to send the opposite command because it is the opposite of a detection task

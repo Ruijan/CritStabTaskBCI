@@ -12,7 +12,8 @@ classdef TobiID < handle
         function obj = TobiID(nLoop)
             obj.loop = nLoop;
             obj.iDMessage = idmessage_new();
-            onj.serializer = idserializerrapid_new(obj.iDMessage);
+            idmessage_setfamilytype(obj.iDMessage, 0);
+            obj.serializer = idserializerrapid_new(obj.iDMessage);
         end
         function [attached] = isAttached(obj)
             [attached] = tid_isattached(obj.tobiID);

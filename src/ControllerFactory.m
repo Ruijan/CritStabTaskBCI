@@ -56,7 +56,6 @@ classdef ControllerFactory < handle
 
 		function valid = isValidTobiICGet(tobiICGet)
 			valid = true;
-			class(tobiICGet)
 			if ~strcmp(class(tobiICGet),'TobiICGet') && ~isempty(tobiICGet)
 				valid = false;
 			end

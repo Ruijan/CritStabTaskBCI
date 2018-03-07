@@ -61,6 +61,7 @@ classdef ConnectedTaskRunner < handle & TaskRunner
                 obj.tryConnectingToTobiId();
             end
         end
+        
         function tryConnectingToTobiId(obj)
             if(obj.tobiIdSender.attach('/bus') == false)
                 error('ConnectedTaskRunner:TIDConnection', 'Cannot connect to attach TobiID to CNBI Loop.')
