@@ -62,6 +62,7 @@ classdef GraphicalCSTask < handle & CSTask
         end
 
         function destroy(obj)
+            destroy@CSTask(obj);
             obj.engine.closeAllWindows();
         end
     end
