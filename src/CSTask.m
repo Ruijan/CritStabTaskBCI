@@ -232,6 +232,9 @@ classdef CSTask < handle
         function destroy(obj)
             obj.controller.destroy();
             obj.taskRunner.destroy();
+            for feedbackIndex = 1:length(obj.feedbacks)
+                obj.feedbacks(feedbackIndex).destroy();
+            end
         end
     end
 end

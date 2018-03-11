@@ -20,6 +20,12 @@ classdef FeedbackFactory < handle
 			elseif strcmp(p.Results.mode, 'Connected')
 				disp('Create Connected Feedback');
 				feedback = ConnectedFeedback(p.Results.loop, p.Results.tobiIDSet, p.Results.system);
+			elseif strcmp(p.Results.mode, 'VibroTactile')
+				disp('Create Vibro Tactile Feedback');
+				feedback = VibroTactileFeedback(p.Results.system);
+			elseif strcmp(p.Results.mode, 'DiscretizedVibroTactile')
+				disp('Create Vibro Tactile Feedback');
+				feedback = DiscretizedVibroTactileFeedback(p.Results.system);
 			end
 		end
 
@@ -28,6 +34,8 @@ classdef FeedbackFactory < handle
 			if ~ischar(controllerMode) || (~strcmp(controllerMode,'Visual') && ...
 				~strcmp(controllerMode,'DiscretizedVisual') && ...
 				~strcmp(controllerMode,'Connected') && ...
+				~strcmp(controllerMode,'VibroTactile') && ...
+				~strcmp(controllerMode,'DiscretizedVibroTactile') && ...
 				~strcmp(controllerMode,'None'))
 				valid = false;
 			end
