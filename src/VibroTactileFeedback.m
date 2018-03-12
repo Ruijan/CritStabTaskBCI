@@ -14,7 +14,7 @@ classdef VibroTactileFeedback < Feedback & handle
 			fopen(obj.arduinoDevice);
 		end
 
-		function update(obj)
+		function update(obj, dt)
 			normalizedState = floor(obj.system.state / obj.system.boundary * 128) + 128
 			fprintf(obj.arduinoDevice,'%u\n', normalizedState, 'sync');
 			% response = fscanf(obj.arduinoDevice);

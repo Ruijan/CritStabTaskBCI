@@ -9,7 +9,7 @@ classdef Feedback < handle & matlab.mixin.Heterogeneous
 	end 
 	methods(Abstract)
 		init(obj)
-		update(obj)
+		update(obj, dt)
 		destroy(obj)
 		endTrial(obj)
 	end 

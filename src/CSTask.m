@@ -123,7 +123,7 @@ classdef CSTask < handle
                 obj.updateRecorders();
                 obj.computeITR();
                 for feedbackIndex = 1:length(obj.feedbacks)
-                    obj.feedbacks(feedbackIndex).update();
+                    obj.feedbacks(feedbackIndex).update(dt);
                 end
                 % disp(['Current time : ' num2str(obj.currentTime) '/' num2str(obj.trialDuration)])
                 % disp(['Current ITR : ' num2str(obj.controllerITR)])

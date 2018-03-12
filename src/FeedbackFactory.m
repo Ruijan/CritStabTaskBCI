@@ -7,16 +7,15 @@ classdef FeedbackFactory < handle
 			addOptional(p,'engine', NaN, @FeedbackFactory.isValidEngine);
 			addOptional(p,'loop', NaN, @FeedbackFactory.isValidLoop);
 			addOptional(p,'tobiIDSet', NaN, @FeedbackFactory.isValidTobiIDSet);
-			addOptional(p,'bins', 8); %8 Hz
-			addOptional(p,'frequency', 10); %10 Hz
+			addOptional(p,'bins', 8); %8 bins
+			addOptional(p,'frequency', 2); %10 Hz
 			parse(p,varargin{:});
-
 			if strcmp(p.Results.mode, 'Visual')
 				disp('Create Visual Feedback');
 				feedback = VisualFeedback(p.Results.engine, p.Results.system);
 			elseif strcmp(p.Results.mode, 'DiscretizedVisual')
 				disp('Create Discretized Visual Feedback');
-				feedback = DiscretizedVisualFeedback(p.Results.engine, p.Results.system);
+				feedback = DiscretizedVisualFeedback(p.Results.engine, p.Results.system , p.Results.bins, p.Results.frequency);
 			elseif strcmp(p.Results.mode, 'Connected')
 				disp('Create Connected Feedback');
 				feedback = ConnectedFeedback(p.Results.loop, p.Results.tobiIDSet, p.Results.system);
@@ -25,7 +24,7 @@ classdef FeedbackFactory < handle
 				feedback = VibroTactileFeedback(p.Results.system);
 			elseif strcmp(p.Results.mode, 'DiscretizedVibroTactile')
 				disp('Create Vibro Tactile Feedback');
-				feedback = DiscretizedVibroTactileFeedback(p.Results.system);
+				feedback = DiscretizedVibroTactileFeedback(p.Results.system, p.Results.bins. p.Results.frequency);
 			end
 		end
 
