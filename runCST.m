@@ -8,7 +8,7 @@ function runCST(varargin)
 	defaultRuns				= 4;
 	defaultTrialsPerRun 	= 15;
 	defaultBins 			= 8; %bins
-	defaultFrequency		= 10; %Hz
+	defaultFrequency		= 2; %Hz
 
 	
 	p = inputParser;

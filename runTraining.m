@@ -1,3 +1,3 @@
 addpath .
-runCST('Mouse', 'Graphic', 1, 3, 'None', 'Simple', {'Visual', 'VibroTactile'});
-% exit
+runCST('Mouse', 'Graphic', 1, 3, 'None', 'Simple', {'DiscretizedVisual', 'Visual'});
+exit

@@ -24,7 +24,7 @@ classdef VisualFeedback < Feedback & handle
 			obj.offset = windowSize(3)*0.1;
 		end
 
-		function update(obj)
+		function update(obj, dt)
 			obj.drawSystem();
 			obj.drawBoundaries();
 

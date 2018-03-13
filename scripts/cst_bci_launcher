@@ -19,7 +19,7 @@ session="$(python3 launcherSession.py --subject $subject)"
 
 
 if [ "$modality" == "training" ]; then
-	ptb3-matlab -nodesktop -nosplash -r runTraining -sd /home/cnbi/dev/CritStabTaskBCI/ -useStartupFolderPref
+	ptb3-matlab -nodesktop -nosplash -r runTraining -sd ${HOME}/dev/CritStabTaskBCI/ -useStartupFolderPref
 else
 	xml="${HOME}/data/BCICourse/$subject/mi_cst_prot.xml"
 	gnome-terminal \
