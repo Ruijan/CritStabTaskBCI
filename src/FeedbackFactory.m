@@ -24,7 +24,7 @@ classdef FeedbackFactory < handle
 				feedback = VibroTactileFeedback(p.Results.system);
 			elseif strcmp(p.Results.mode, 'DiscretizedVibroTactile')
 				disp('Create Vibro Tactile Feedback');
-				feedback = DiscretizedVibroTactileFeedback(p.Results.system, p.Results.bins. p.Results.frequency);
+				feedback = DiscretizedVibroTactileFeedback(p.Results.system, p.Results.bins, p.Results.frequency);
 			end
 		end
 

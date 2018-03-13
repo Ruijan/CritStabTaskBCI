@@ -7,8 +7,10 @@ classdef DiscretizedVibroTactileFeedback < VibroTactileFeedback & handle
 	end 
 
 	methods 
-		function obj = DiscretizedVibroTactileFeedback(system)
+		function obj = DiscretizedVibroTactileFeedback(system, bins, frequency)
 			obj@VibroTactileFeedback(system);
+			obj.bins 		= bins;
+			obj.frequency 	= frequency;
 		end
 
 		function init(obj)
@@ -24,10 +26,11 @@ classdef DiscretizedVibroTactileFeedback < VibroTactileFeedback & handle
 				obj.sendStateToArduino();
 			end
 		end
-		
+
 		function sendStateToArduino(obj)
-			graphicalState = floor(obj.system.state / obj.stateBinSize + obj.bins / 2);
-			fprintf(obj.arduinoDevice,'%u\n', graphicalState, 'sync');
+			graphicalState = floor((obj.system.state + obj.system.boundary) / obj.stateBinSize);
+			obj.dataMessage(2) = graphicalState;
+			obj.sendDataToDevice(obj.dataMessage, false);
 		end
 	end 
 end 

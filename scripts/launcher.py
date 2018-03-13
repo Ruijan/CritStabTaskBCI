@@ -59,7 +59,7 @@ def createXML(subject,age):
 	user = getpass.getuser()
 	subjectPath = dataPath + "/" + subject
 	xmlFile = subjectPath + "/mi_cst_prot.xml" 
-	copyfile("/home/cnbi/.cnbitk/cnbimi/xml/mi_cst_prot.xml", xmlFile)
+	copyfile("/home/" + user + "/.cnbitk/cnbimi/xml/mi_cst_prot.xml", xmlFile)
 	now = datetime.datetime.now()
 	tree = ET.parse(xmlFile)
 	root = tree.getroot()
