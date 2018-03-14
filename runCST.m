@@ -7,7 +7,7 @@ function runCST(varargin)
 	defaultFeedback 		= {'Visual'};
 	defaultRuns				= 4;
 	defaultTrialsPerRun 	= 15;
-	defaultBins 			= 8; %bins
+	defaultBins 			= 4; %bins
 	defaultFrequency		= 2; %Hz
 
 	

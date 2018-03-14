@@ -14,7 +14,10 @@ def chooseModality(button):
 			print("online")
 		elif app.getRadioButton("modality") == "Training":
 			print("training")
-		
+		elif app.getRadioButton("modality") == "TrainingVibro":
+			print("trainingVibro")
+		elif app.getRadioButton("modality") == "TrainingVisualVibro":
+			print("trainingVisualVibro")
 	elif button == "Cancel":
 		print(str(-1))
 	app.stop()
@@ -24,6 +27,8 @@ app=gui()
 padding = 10;
 app.setGuiPadding(padding, padding)
 app.addRadioButton("modality", "Training")
+app.addRadioButton("modality", "TrainingVibro")
+app.addRadioButton("modality", "TrainingVisualVibro")
 app.addRadioButton("modality", "Offline")
 app.addRadioButton("modality", "Online")
 app.addButtons(["Validate", "Cancel"], chooseModality)

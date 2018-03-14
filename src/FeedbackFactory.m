@@ -25,6 +25,12 @@ classdef FeedbackFactory < handle
 			elseif strcmp(p.Results.mode, 'DiscretizedVibroTactile')
 				disp('Create Vibro Tactile Feedback');
 				feedback = DiscretizedVibroTactileFeedback(p.Results.system, p.Results.bins, p.Results.frequency);
+			elseif strcmp(p.Results.mode, 'PneumaticVibroTactile')
+				disp('Create Pneumatic Vibro Tactile Feedback');
+				feedback = PneumaticVibroTactileFeedback(p.Results.system);
+			elseif strcmp(p.Results.mode, 'DiscretizedPneumaticVibroTactile')
+				disp('Create Discretized Pneumatic Vibro Tactile Feedback');
+				feedback = DiscretizedPneumaticVibroTactileFeedback(p.Results.system, p.Results.bins, p.Results.frequency);
 			end
 		end
 
@@ -35,6 +41,8 @@ classdef FeedbackFactory < handle
 				~strcmp(controllerMode,'Connected') && ...
 				~strcmp(controllerMode,'VibroTactile') && ...
 				~strcmp(controllerMode,'DiscretizedVibroTactile') && ...
+				~strcmp(controllerMode,'PneumaticVibroTactile') && ...
+				~strcmp(controllerMode,'DiscretizedPneumaticVibroTactile') && ...
 				~strcmp(controllerMode,'None'))
 				valid = false;
 			end

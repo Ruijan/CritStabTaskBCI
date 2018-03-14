@@ -8,6 +8,7 @@
 #define CORRECTEND 255
 
 #define VERBOSE 2
+#define DISCRETEMOTORS 3
 #define VERBOSEDISCRETEMOTORS 4
 
 int state = 0;
@@ -50,7 +51,8 @@ void loop()
             if(message[MODE]%VERBOSE == 0){
               sendMessageBack();
             }
-            if(message[MODE] == VERBOSEDISCRETEMOTORS){
+            if(message[MODE] == VERBOSEDISCRETEMOTORS || 
+            message[MODE] == DISCRETEMOTORS){
               setDiscreteMotorsFromMessage();
             }
           }

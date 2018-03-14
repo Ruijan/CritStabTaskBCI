@@ -3,14 +3,14 @@ classdef VibroTactileFeedback < Feedback & handle
 		arduinoDevice
 		connectedMessage = [1, 0, 1, 255];
 		disconnectedMessage = [1, 0, 255, 255];
-		dataMessage = [1, 0, 2, 255];
+		dataMessage = [1, 0, 3, 255];
 	end 
 
 	methods 
 		function obj = VibroTactileFeedback(system)
 			obj@Feedback(system);
 			
-			obj.arduinoDevice = serial('/dev/ttyUSB0', 'BaudRate', 9600);
+			obj.arduinoDevice = serial('/dev/ttyUSB0', 'BaudRate', 11520);
 		end
 
 		function init(obj)
@@ -33,11 +33,23 @@ classdef VibroTactileFeedback < Feedback & handle
 		function answer = sendDataToDevice(obj, data, checkAnswer)
 			answer = false;
 			for i = 1:length(data)
-		        fwrite(obj.arduinoDevice, data(i));
+				% Slower writing by MATLAB
+		        %fwrite(obj.arduinoDevice, data(i), 'uint8');
+
+		        % Faster writing by MATLAB (twice faster)
+		        fwrite(igetfield(obj.arduinoDevice, 'jobject'), uint8(data(i)), length(data(i)), 0, 0, 0);
 		    end
 		    if checkAnswer
-				response = fread(obj.arduinoDevice, 4, 'uint8');
-			    response = response';
+		    	% Slower response by MATLAB
+				%response = fread(obj.arduinoDevice, 4, 'uint8');
+
+				% Faster response by MATLAB
+				out = fread(igetfield(obj.arduinoDevice, 'jobject'), 4, 0, 0);
+				newdata = double(out(1));
+				response = newdata + (newdata<0).*256;
+                if ~isempty(response)
+                    response = reshape(response, 1, 4);
+                end
 			    if ~isequal(response, data)
 			        warning(['Sent ' mat2str(data) ' Arduino got: ' mat2str(response)]);
 			    else
