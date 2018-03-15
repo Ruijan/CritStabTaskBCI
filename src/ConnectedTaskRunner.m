@@ -77,7 +77,7 @@ classdef ConnectedTaskRunner < handle & TaskRunner
 
         function destroy(obj)
             obj.tobiIdSender.detach();
-            obj.tobiIdSender.delete();
+            obj.tobiIdSender.destroy();
             obj.loop.disconnect();
         end
 	end

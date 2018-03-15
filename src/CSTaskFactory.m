@@ -64,13 +64,13 @@ classdef CSTaskFactory < handle
 			timeProperties 		= [];
 			if strcmp(params.controller, 'BCI')
 				difficultyUpdater 	= QuestDifficultyUpdater(0.5, 1.5, 0.75, 0.75, 3.5, 0.99, 0.01);
-				timeProperties 		= TaskTimeProperties(9, 1.5, 5, 3, 0, 0, 60);
+				timeProperties 		= TaskTimeProperties(9, 1.5, 5, 3, 0, 0, 50);
 			elseif strcmp(params.controller, 'Mouse')
 				difficultyUpdater 	= QuestDifficultyUpdater(3.0, 5, 1.5, 0.75, 3.5, 0.99, 0.01);
-				timeProperties 		= TaskTimeProperties(9, 0, 5, 0, 0, 0, 60);
+				timeProperties 		= TaskTimeProperties(9, 0, 5, 0, 0, 0, 50);
 			elseif strcmp(params.controller, 'Training')
 				difficultyUpdater 	= VectorDifficultyUpdater([1.5], [1]);
-				timeProperties 		= TaskTimeProperties(15, 1, 5, 3, 0, 0, 60);
+				timeProperties 		= TaskTimeProperties(30, 1, 5, 3, 0, 0, 50);
 			end
 
 			task = CSTaskFactory.createCSTask(params.display, controller, newSystem, ...
