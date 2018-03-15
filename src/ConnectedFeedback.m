@@ -15,7 +15,7 @@ classdef ConnectedFeedback < Feedback & handle
 			lastEventSent = 1;
 		end
 
-		function update(obj)
+		function update(obj, dt)
 			if length(obj.system.stateMemory) > 2
 				if obj.system.state >= 0 && obj.system.stateMemory(end) < 0
 					obj.tobiIdSender.sendEvent(obj.lastEventSent + 1000);

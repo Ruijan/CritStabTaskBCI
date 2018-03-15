@@ -28,7 +28,7 @@ classdef TobiID < handle
             [obj.tobiID]    = tid_delete(obj.tobiID);
             tID             = obj.tobiID;
             obj.serializer  = idserializerrapid_delete(obj.serializer);
-            obj.iDMessage   = idmessage_delete(iDMessage);
+            obj.iDMessage   = idmessage_delete(obj.iDMessage);
         end
     end
 end

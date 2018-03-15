@@ -156,7 +156,6 @@ else
 		echo "[$NAME] - Terminate MATLAB process"
 		cl_rpc terminate $MATLABPID
 	fi
-	python3 moveFilesToSubjectPath.py --subject $subject --session $session
 	# Unload configuration from nameserver
 	cl_init -u -B $block
 	cl_rpc eraseconfig $block subject 
@@ -165,6 +164,6 @@ else
 	cl_killloop
 	rm *.log
 fi
-
+python3 moveFilesToSubjectPath.py --subject $subject --session $session
 
 
