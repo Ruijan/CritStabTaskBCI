@@ -27,7 +27,7 @@ classdef TobiIC < handle
             [obj.tobiIC]    = tic_delete(obj.tobiIC);
             tIC             = obj.tobiIC;
             obj.serializer  = icserializerrapid_delete(obj.serializer);
-            obj.iCMessage   = icmessage_delete(iCMessage);
+            obj.iCMessage   = icmessage_delete(obj.iCMessage);
         end
     end
 end

@@ -17,7 +17,7 @@ classdef GraphicalCSTask < handle & CSTask
 
         function init(obj)
             set(0,'units','pixels');
-            obj.engine.openWindow(get(0,'screensize')*0.5 - [1 1 0 0]);
+            obj.engine.openWindow(get(0,'screensize') - [1 1 0 0]);
             obj.stopTaskKey = obj.engine.getKeyboardKey('ESCAPE');
             obj.engine.addEnabledKeyInput(obj.stopTaskKey);
             init@CSTask(obj);
