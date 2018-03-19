@@ -10,10 +10,10 @@ classdef SystemFactory < handle
 			if strcmp(p.Results.mode, 'Graphic')
 				disp('Create Visual System');
 				newSystem = GraphicalSystem(1.5, screenResolution(3)*0.4, ...
-					screenResolution(3)*0.4, 2, p.Results.engine);
+					screenResolution(3)*0.4, 4, p.Results.engine);
 			elseif strcmp(p.Results.mode, 'None')
 				disp('Create Hidden System');
-				newSystem = System(1.5, screenResolution(3)*0.4, 2);
+				newSystem = System(1.5, screenResolution(3)*0.4, 4);
 
 			end
 

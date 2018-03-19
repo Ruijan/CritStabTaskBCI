@@ -43,6 +43,7 @@ classdef VisualFeedback < Feedback & handle
 		end
 
 		function drawBoundaries(obj)
+		    obj.engine.drawText('+', obj.engine.getCenter() + [-150, -100], [255 255 255]);
 			obj.engine.drawFilledRect([255 0 0], ...
 				[obj.boundary * 2 + obj.offset obj.windowSize(4) / 2], [10 obj.windowSize(4) / 3]);
 			obj.engine.drawFilledRect([255 0 0], ...

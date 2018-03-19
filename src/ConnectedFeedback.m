@@ -13,16 +13,16 @@ classdef ConnectedFeedback < Feedback & handle
 		end
 
 		function obj = init(obj)
-			lastEventSent = 1;
+			obj.lastEventSent = 1;
 		end
 
-		function update(obj)
+		function update(obj, dt)
 			if length(obj.system.stateMemory) > 2
-				if obj.system.state >= 0 && obj.system.stateMemory(end) < 0
+				if obj.system.state >= 0 && obj.system.stateMemory(end-1) < 0
 					obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
 					obj.tobiIdSender.sendEvent(782);
 					obj.lastEventSent = 782;
-				elseif obj.system.state < 0 && obj.system.stateMemory(end) >= 0
+				elseif obj.system.state < 0 && obj.system.stateMemory(end-1) >= 0
 					obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
 					obj.tobiIdSender.sendEvent(783);
 					obj.lastEventSent = 783;
@@ -61,9 +61,7 @@ classdef ConnectedFeedback < Feedback & handle
 	    end
 
 		function destroy(obj)
-	        obj.tobiIdSender.detach();
-	        obj.tobiIdSender.delete();
-	        obj.loop.disconnect();
+
 	    end
 
 	    function endTrial(obj)
