@@ -2,6 +2,7 @@ classdef ConnectedTaskRunner < handle & TaskRunner
 	properties
 		loop,
         tobiIdSender
+        endEventOffset = 32768
 	end
 
 	methods
@@ -15,6 +16,7 @@ classdef ConnectedTaskRunner < handle & TaskRunner
         function endTrial(obj, outcome)
             endTrial@TaskRunner(obj, outcome);
             obj.checkIfConnected();
+            obj.tobiIdSender.sendEvent(781 + endEventOffset);
             if outcome == 1
                 % Send Hit/Success event in case of stable system
                 obj.tobiIdSender.sendEvent(897);

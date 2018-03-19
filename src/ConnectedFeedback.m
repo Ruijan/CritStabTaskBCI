@@ -1,8 +1,9 @@
 classdef ConnectedFeedback < Feedback & handle
 	properties 
 		loop,
-        tobiIdSender
-        lastEventSent
+        tobiIdSender,
+        lastEventSent,
+    	endEventOffset = 32768
 	end 
 	methods 
 		function obj = ConnectedFeedback(loop, tobiIdSender, nSystem)
@@ -18,11 +19,11 @@ classdef ConnectedFeedback < Feedback & handle
 		function update(obj)
 			if length(obj.system.stateMemory) > 2
 				if obj.system.state >= 0 && obj.system.stateMemory(end) < 0
-					obj.tobiIdSender.sendEvent(obj.lastEventSent + 1000);
+					obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
 					obj.tobiIdSender.sendEvent(782);
 					obj.lastEventSent = 782;
 				elseif obj.system.state < 0 && obj.system.stateMemory(end) >= 0
-					obj.tobiIdSender.sendEvent(obj.lastEventSent + 1000);
+					obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
 					obj.tobiIdSender.sendEvent(783);
 					obj.lastEventSent = 783;
 				end
@@ -66,7 +67,7 @@ classdef ConnectedFeedback < Feedback & handle
 	    end
 
 	    function endTrial(obj)
-			obj.tobiIdSender.sendEvent(obj.lastEventSent + 1000);
+			obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
 		end
 	end
 end 
