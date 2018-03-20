@@ -16,11 +16,11 @@ classdef TobiIDSet < handle & TobiID
 
         function [hasmessage] = sendEvent(obj, event)
             obj.messages = [obj.messages event];
+            obj.nextCall = obj.nextCall + obj.delay;
             disp(['Event ' num2str(event) ' will be sent in ' num2str(obj.nextCall)]);
             t = timer('StartDelay', obj.nextCall, 'TimerFcn', @(~,~)obj.sendNextMessage());
             obj.timers = [obj.timers t];
             start(t);
-            obj.nextCall = obj.nextCall + obj.delay;
         end
 
         function sendNextMessage(obj)
