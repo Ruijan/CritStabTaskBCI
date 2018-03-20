@@ -26,7 +26,7 @@ classdef TobiIDSet < handle & TobiID
         function sendNextMessage(obj)
             idmessage_setevent(obj.iDMessage, obj.messages(1));
             tid_setmessage(obj.tobiID, obj.serializer, -1);
-            obj.nextCall = obj.nextCall - obj.delay
+            obj.nextCall = obj.nextCall - obj.delay;
             delete(obj.timers(1))
             disp(['Send event ' num2str(obj.messages(1))]);
             obj.messages(1) = [];
