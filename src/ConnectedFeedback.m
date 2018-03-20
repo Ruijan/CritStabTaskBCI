@@ -19,20 +19,28 @@ classdef ConnectedFeedback < Feedback & handle
 		function update(obj, dt)
 			if length(obj.system.stateMemory) > 2
 				if obj.system.state >= 0 && obj.system.stateMemory(end-1) < 0
-					obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
+					obj.tobiIdSender.sendEvent(781 + obj.endEventOffset);
 					obj.tobiIdSender.sendEvent(782);
+					obj.tobiIdSender.sendEvent(782 + obj.endEventOffset);
+					obj.tobiIdSender.sendEvent(781);
 					obj.lastEventSent = 782;
 				elseif obj.system.state < 0 && obj.system.stateMemory(end-1) >= 0
-					obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
+					obj.tobiIdSender.sendEvent(781 + obj.endEventOffset);
 					obj.tobiIdSender.sendEvent(783);
+					obj.tobiIdSender.sendEvent(783 + obj.endEventOffset);
+					obj.tobiIdSender.sendEvent(781);
 					obj.lastEventSent = 783;
 				end
 			else
 				if obj.system.state > 0 && length(obj.system.stateMemory) == 1
 					obj.tobiIdSender.sendEvent(782);
+					obj.tobiIdSender.sendEvent(782 + obj.endEventOffset);
+					obj.tobiIdSender.sendEvent(781);
 					obj.lastEventSent = 782;
 				elseif obj.system.state < 0 && length(obj.system.stateMemory) == 1
 					obj.tobiIdSender.sendEvent(783);
+					obj.tobiIdSender.sendEvent(783 + obj.endEventOffset);
+					obj.tobiIdSender.sendEvent(781);
 					obj.lastEventSent = 783;
 				end
 			end
@@ -65,7 +73,7 @@ classdef ConnectedFeedback < Feedback & handle
 	    end
 
 	    function endTrial(obj)
-			obj.tobiIdSender.sendEvent(obj.lastEventSent + endEventOffset);
+			obj.tobiIdSender.sendEvent(781 + obj.endEventOffset);
 		end
 	end
 end 

@@ -87,7 +87,10 @@ classdef CSTask < handle
                 case CSTask.SwitchRun
                     obj.updateSwitchRun(dt);
                 otherwise
-                    obj.state = CSTask.Baseline;
+                    obj.unstableSystem.lambda = obj.difficultyUpdater.getNewDifficulty();
+                    obj.currentTime     = 0;
+                    obj.state           = CSTask.Break;
+                    obj.taskRunner.startBreak(dt);
             end
         end
 
