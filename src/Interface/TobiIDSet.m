@@ -5,7 +5,7 @@ classdef TobiIDSet < handle & TobiID
         messages = [],
         timers  = [],
         nextCall = 0
-        delay = 0.0625;
+        delay = 0.063;
     end 
     
     methods
