@@ -28,6 +28,10 @@ classdef TrainingController < handle & Controller
 
 		function destroy(obj)
 
-		end
+        end
+        function structure = convertToStruct(obj)
+            structure = convertToStruct@Controller(obj);
+            structure.maxTimePerCommand = obj.maxTimePerCommand;
+        end
 	end 
 end

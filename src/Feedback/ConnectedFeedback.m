@@ -17,7 +17,7 @@ classdef ConnectedFeedback < Feedback & handle
 		end
 
 		function update(obj, dt)
-			if length(obj.system.stateMemory) > 2
+			if length(obj.system.stateMemory) > 1
 				if obj.system.state >= 0 && obj.system.stateMemory(end-1) < 0
 					obj.tobiIdSender.sendEvent(781 + obj.endEventOffset);
 					obj.tobiIdSender.sendEvent(782);

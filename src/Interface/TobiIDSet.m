@@ -6,19 +6,21 @@ classdef TobiIDSet < handle & TobiID
         timers  = [],
         nextCall = 0
         delay = 0.063;
+        TimerFcn
     end 
     
     methods
         function obj = TobiIDSet(loop)
             obj@TobiID(loop);
             [obj.tobiID] = tid_new_setonly();
+            obj.TimerFcn = @(~,~)obj.sendNextMessage();
         end
 
         function [hasmessage] = sendEvent(obj, event)
             obj.messages = [obj.messages event];
             obj.nextCall = obj.nextCall + obj.delay;
             disp(['Event ' num2str(event) ' will be sent in ' num2str(obj.nextCall)]);
-            t = timer('StartDelay', obj.nextCall, 'TimerFcn', @(~,~)obj.sendNextMessage());
+            t = timer('StartDelay', obj.nextCall, 'TimerFcn', obj.TimerFcn);
             obj.timers = [obj.timers t];
             start(t);
         end
@@ -27,7 +29,6 @@ classdef TobiIDSet < handle & TobiID
             idmessage_setevent(obj.iDMessage, obj.messages(1));
             tid_setmessage(obj.tobiID, obj.serializer, -1);
             obj.nextCall = obj.nextCall - obj.delay;
-            delete(obj.timers(1))
             disp(['Send event ' num2str(obj.messages(1))]);
             obj.messages(1) = [];
             obj.timers(1) = [];

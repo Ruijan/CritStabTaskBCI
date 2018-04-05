@@ -14,6 +14,13 @@ classdef Controller < handle
             obj.inputMemory = [];
             obj.input       = 0;
         end
+        function structure = convertToStruct(obj)
+            structure = struct();
+            structure.input = obj.input;
+            structure.inputMemory = obj.inputMemory;
+            structure.maxInput = obj.maxInput;
+            structure.minInput = obj.minInput;
+        end
     end
     methods(Abstract)
     	initController(obj)

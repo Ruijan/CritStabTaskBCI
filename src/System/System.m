@@ -59,6 +59,14 @@ classdef System < handle
             obj.input       = 0;
             obj.initState();
         end
+        
+        function structure = convertToStruct(obj)
+            structure = struct();
+            structure.stateMemory   = obj.stateMemory;
+            structure.inputMemory   = obj.inputMemory;
+            structure.timeMemory    = obj.timeMemory;
+            structure.boundary      = obj.boundary;
+        end
     end
 end
 

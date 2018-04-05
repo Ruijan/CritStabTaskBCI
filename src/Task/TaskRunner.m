@@ -49,6 +49,14 @@ classdef TaskRunner < handle
         function destroy(obj)
 
         end
+        function structure = convertToStruct(obj)
+            structure = struct();
+            structure.runs          = obj.runs;
+            structure.trialsPerRun  = obj.trialsPerRun;
+            structure.currentTrial  = obj.currentTrial;
+            structure.currentRun    = obj.currentRun;
+            structure.results       = obj.results;
+        end
 	end
 
 

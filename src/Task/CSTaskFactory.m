@@ -70,7 +70,7 @@ classdef CSTaskFactory < handle
 				timeProperties 		= TaskTimeProperties(9, 0, 5, 0, 0, 0, 60);
 			elseif strcmp(params.controller, 'Training')
 				difficultyUpdater 	= VectorDifficultyUpdater([1.5], [1]);
-				timeProperties 		= TaskTimeProperties(30, 1, 5, 3, 0, 0, 60);
+				timeProperties 		= TaskTimeProperties(30, 0, 5, 3, 0, 0, 60);
 			end
 
 			task = CSTaskFactory.createCSTask(params.display, controller, newSystem, ...
